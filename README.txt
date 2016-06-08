@@ -1,6 +1,6 @@
 # detect_spindles
 
-Method for detecting sleep spindles using EEGlab functions and datasets
+Method for detecting sleep spindles using EEGlab for MATLAB
 
 Authors: Stephane Sockeel, PhD, University of Montreal; Stuart Fogel, PhD, Western University.
 
