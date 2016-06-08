@@ -3,6 +3,7 @@
 Method for detecting sleep spindles using EEGlab functions and datasets
 
 Authors:  Stephane Sockeel, PhD, University of Montreal
+          
           Stuart Fogel, PhD, Western University
 
           Thanks to support from Julien Doyon and input from Arnaud Bore.
