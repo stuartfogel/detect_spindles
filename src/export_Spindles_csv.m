@@ -42,6 +42,8 @@ for i = 1:nbMrk
             Mrk(i).channel = [];
         elseif isnan(Mrk(i).channel) % some file importers indicate no channel as NaN instead of []
             Mrk(i).channel = [];
+        elseif isempty(Mrk(i).channel) % some events have empty channels '' instead of []
+            Mrk(i).channel = [];
         else
             Mrk(i).channel = ChannelName{Mrk(i).channel};
         end
