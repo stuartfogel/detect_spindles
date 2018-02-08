@@ -121,7 +121,7 @@ for nfile = 1:length(filename)
             ,'ZSResetThreshold', 0.5 ... Value for the reset. Default: [0.5].
             ,'ZSBeginThreshold', 0.5 ... Value to detect the begining of spindles. Default: [0.5].
             ,'ZSDelay', 0.25 ... minimum delay btw 2 spindles on the same channel (sec.). Default: [0.25].
-            ,'minDur', 0 ... minimum spindle duration. Default: [0].
+            ,'minDur', 0.25 ... minimum spindle duration. Default: [0.25].
             ,'eventName', {{'Spindle'}} ... name of event. Default: {{'Spindle'}}.
             ,'allsleepstages', {{'N1','N2','N3','N4','REM','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','N4','REM','W','unscored'}}.
             ,'goodsleepstages', {{'N2','N3','N4'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3','N4'}}.
@@ -157,6 +157,5 @@ end
 
 disp('SPINDLE DETECTION COMPLETE!')
 toc
-clear all
 
 end
