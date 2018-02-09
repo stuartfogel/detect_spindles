@@ -118,8 +118,8 @@ for nfile = 1:length(filename)
             ,'channels_of_interest',{{'Fz','Cz','Pz'}} ... selected channels. Default: {{'Fz','Cz','Pz'}}
             ,'ZSwindowlength', 60 ... window for ZSCORE (in seconds). Default: [60].
             ,'ZSThreshold', 2.33 ... Threshold for the ZScore. Default: [2.33].
-            ,'ZSResetThreshold', 0.5 ... Value for the reset. Default: [0.5].
-            ,'ZSBeginThreshold', 0.5 ... Value to detect the begining of spindles. Default: [0.5].
+            ,'ZSResetThreshold', 0.25 ... Value for the reset. Default: [0.25].
+            ,'ZSBeginThreshold', 0.25 ... Value to detect the begining of spindles. Default: [0.25].
             ,'ZSDelay', 0.25 ... minimum delay btw 2 spindles on the same channel (sec.). Default: [0.25].
             ,'minDur', 0.25 ... minimum spindle duration. Default: [0.25].
             ,'eventName', {{'Spindle'}} ... name of event. Default: {{'Spindle'}}.
