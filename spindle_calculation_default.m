@@ -116,6 +116,7 @@ for nch = 1:length(PARAM.channels)
             % export to excel individual data
             sheetname = char(PARAM.filename(nfile));
             sheetname = sheetname(1:end-4);
+            sheetname(isspace(sheetname)) = [];
             % write to xlsx
             writetable(perStageData{nfile,nch,nstage},allTypeFilename,'Sheet',sheetname)
             writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
