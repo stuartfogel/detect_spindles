@@ -110,8 +110,8 @@ warning( 'off', 'MATLAB:xlswrite:AddSheet' );
 for nch = 1:length(PARAM.channels)
     for nstage = 1:length(PARAM.stages)
         allTypeFilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '.xlsx']; % all spindle type
-        slowfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '_<_' num2str(PARAM.type) 'Hz.xlsx']; % slow spindles
-        fastfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '_>_' num2str(PARAM.type) 'Hz.xlsx']; % fast spindles
+        slowfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '_slow.xlsx']; % slow spindles
+        fastfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '_fast.xlsx']; % fast spindles
         for nfile = 1:length(PARAM.filename)
             % export to excel individual data
             sheetname = char(PARAM.filename(nfile));
