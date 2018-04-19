@@ -7,12 +7,12 @@ function EEG1 = DS_merge_event(EEG1,EEG2)
 % Part of detect_spindles toolbox:
 %
 % Authors:  Stephane Sockeel, PhD, University of Montreal
-%           Stuart Fogel, PhD, Western University
+%           Stuart Fogel, PhD, University of Ottawa
 %           Thanks to support from Julien Doyon and input from Arnaud Bore.
 %           Copyright (C) Stuart fogel & Stephane Sockeel, 2016
 %           See the GNU General Public License for more details.
 %
-% Contact:  sfogel@uwo.ca
+% Contact:  sfogel@uottawa.ca
 %
 % Date:     June 8, 2016
 %
