@@ -4,11 +4,11 @@ function spindle_calculation_default()
 %
 % Calculate spindle data summary (from .csv format output)
 %
-% Info:     Opens csv output from 'detect_spindles' pipeline and computes 
+% Info:     Opens csv output from 'detect_spindles' pipeline and computes
 %           summary stats.
 %
 % Download: https://github.com/stuartfogel/detect_spindles
-% 
+%
 % Author:   Stuart Fogel, PhD, University of Ottawa, School of Psychology
 %           Sleep Research Laboratory
 %           Copyright (C) Stuart fogel, 2018
@@ -18,11 +18,11 @@ function spindle_calculation_default()
 %
 % Date:     April 9, 2018
 %
-% Citation: Ray, L.B., Sockeel, S., Soon, M., Bore, A., Myhr, A., 
-%           Stojanoski, B., Cusack, R., Owen, A.M., Doyon, J., Fogel, S., 
-%           2015. Expert and crowd-sourced validation of an individualized 
-%           sleep spindle detection method employing complex demodulation 
-%           and individualized normalization. Front. Hum. Neurosci. 9. 
+% Citation: Ray, L.B., Sockeel, S., Soon, M., Bore, A., Myhr, A.,
+%           Stojanoski, B., Cusack, R., Owen, A.M., Doyon, J., Fogel, S.,
+%           2015. Expert and crowd-sourced validation of an individualized
+%           sleep spindle detection method employing complex demodulation
+%           and individualized normalization. Front. Hum. Neurosci. 9.
 %           doi:10.3389/fnhum.2015.00507
 %
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
@@ -30,10 +30,10 @@ function spindle_calculation_default()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% User defined parameters
-PARAM.minSpDur = 0.5; % minimum spindle duration in sec. Default = 0.5.
+PARAM.minSpDur = 0.249; % minimum spindle duration in sec. Default = 0.49.
 PARAM.type = 13.5; % frequency (Hz) boundary between slow and fast spindles. Default = 13.5.
 PARAM.channels = {'Fz','Cz','Pz'}; % channels to extract spindle info. Default = {'Fz','Cz','Pz'}.
-PARAM.stages = {'NREM2','NREM3'}; % channels to extract spindle info. Default = {'NREM2','NREM3'}.
+PARAM.stages = {'N2','N3'}; % channels to extract spindle info. Default = {'N2','N3'}.
 
 %% Specify filename(s)
 % you can manually specify filenames here, or leave empty for pop-up
@@ -118,12 +118,16 @@ for nch = 1:length(PARAM.channels)
             sheetname = sheetname(1:end-4);
             sheetname(isspace(sheetname)) = [];
             % write to xlsx
-            writetable(perStageData{nfile,nch,nstage},allTypeFilename,'Sheet',sheetname)
-            writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
-            writetable(data{nfile,nch,nstage,1},slowfilename,'Sheet',sheetname)
-            writetable(struct2table(PARAM),slowfilename,'Sheet',1)
-            writetable(data{nfile,nch,nstage,2},fastfilename,'Sheet',sheetname)
-            writetable(struct2table(PARAM),fastfilename,'Sheet',1)
+            if length(sheetname)>30
+                error('Input file name too long. Please rename files with shorter names.')
+            else
+                writetable(perStageData{nfile,nch,nstage},allTypeFilename,'Sheet',sheetname)
+                writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
+                writetable(data{nfile,nch,nstage,1},slowfilename,'Sheet',sheetname)
+                writetable(struct2table(PARAM),slowfilename,'Sheet',1)
+                writetable(data{nfile,nch,nstage,2},fastfilename,'Sheet',sheetname)
+                writetable(struct2table(PARAM),fastfilename,'Sheet',1)
+            end
         end
     end
 end
