@@ -20,11 +20,11 @@ function [EEG, marker] = detect_spindles(EEG,PARAM)
 %
 % Date:     June 8, 2016
 %
-% Citation: Ray, L.B., Sockeel, S., Soon, M., Bore, A., Myhr, A., 
-%           Stojanoski, B., Cusack, R., Owen, A.M., Doyon, J., Fogel, S., 
-%           2015. Expert and crowd-sourced validation of an individualized 
-%           sleep spindle detection method employing complex demodulation 
-%           and individualized normalization. Front. Hum. Neurosci. 9. 
+% Citation: Ray, L.B., Sockeel, S., Soon, M., Bore, A., Myhr, A.,
+%           Stojanoski, B., Cusack, R., Owen, A.M., Doyon, J., Fogel, S.,
+%           2015. Expert and crowd-sourced validation of an individualized
+%           sleep spindle detection method employing complex demodulation
+%           and individualized normalization. Front. Hum. Neurosci. 9.
 %           doi:10.3389/fnhum.2015.00507
 %
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
@@ -66,10 +66,15 @@ end
 
 %% Specify Filename(s)
 % you can manually specify filenames here, or leave empty for pop-up
-pathname = '';
-filename = {'',...
-    ''
-    };
+if isempty(EEG)
+    pathname = '';
+    filename = {'',...
+        ''
+        };
+else
+    pathname = EEG.filepath;
+    filename = EEG.filename;
+end
 
 %% Open interface to select *.mat file(s)
 if isempty(pathname)
