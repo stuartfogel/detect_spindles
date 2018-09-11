@@ -50,7 +50,7 @@ for iSpin = indSpindle
     sp_end = Spindle.duration + sp_beg;
     data = EEG.data(Spindle.channel,sp_beg:sp_end);
     data_F = filtering(data, EEG.srate, PARAM);
-    EEG.event(iSpin).peakAmplitude = max(max(data_F,[],2)-min(data_F,[],2));
+    EEG.event(iSpin).amplitude = max(max(data_F)-min(data_F));
     freq = mean(EEG.srate ./ [diff(find((diff(sign(diff(data_F))))>0)) ,  diff(find((diff(sign(diff(data_F))))<0))]);  % frequency : srate divided by the mean of distance btw max pos. peak or min neg. peak
     if PARAM.cdemod_freq - PARAM.cdemod_filter_lowpass/2 - 1 < 1 % for when trying to measure frequencies lower than 1Hz
         if any(isnan(freq))
