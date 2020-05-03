@@ -54,11 +54,12 @@ if PARAM.emptyparam == 1
         ,'ZSDelay', 0.25 ... minimum delay btw 2 spindles on the same channel (sec.). Default: [0.25].
         ,'minDur', 0.49 ... minimum spindle duration. Default: [0.49] (in order to include 0.5 sec spindles).
         ,'eventName', {{'Spindle'}} ... name of event. Default: {{'Spindle'}}.
-        ,'allsleepstages', {{'N1','N2','N3','N4','REM','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','N4','REM','W','unscored'}}.
-        ,'goodsleepstages', {{'N2','N3','N4'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3','N4'}}.
+        ,'allsleepstages', {{'N1','N2','N3','R','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','R','W','unscored'}}.
+        ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.
         ,'badData', {{'Movement'}} ... name for movement artifact. Default: {{'Movement'}}.
         ,'save_result_file','.csv' ... file type to save markers to a file. If empty []: popup window. Default: {{'.csv'}}
-        ,'save_mat_file', 1 ... set to = 1 to save EEG, markers and PARAM to a .mat file. If empty []: popup window. Default: [1].
+        ,'save_mat_file', [] ... set to = 1 to save EEG, markers and PARAM to a .mat file, set empty [] for none. Default: [].
+        ,'save_set_file', 1 ... set to = 1 to save EEG to a .set file. , set empty [] for none. Default: [1].
         ,'output_allfiles', 0 ... set at 1 if you want the complete results with all steps. Note EEG struct will be different dimentions. Default: [0].
         ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
         );
@@ -150,12 +151,13 @@ for nfile = 1:length(filename)
     end
     
     %% saving results
-    if isfield(PARAM,'save_mat_file')
-        if isempty(PARAM.save_result_file)
-            [OutputFile, OutputPath] = uiputfile('*.mat','Export results ?');
-        elseif ~isempty(PARAM.save_result_file)
-            save([OutputPath, OutputFile],'EEG','marker','PARAM');
-        end
+    % for a mat file:
+    if ~isempty(PARAM.save_mat_file)
+        save([OutputPath, OutputFile],'EEG','marker','PARAM');
+    end
+    % for a set file:
+    if ~isempty(PARAM.save_set_file)
+        pop_saveset(EEG, 'filename', OutputFile, 'filepath', OutputPath, 'savemode', 'onefile');
     end
     disp(strcat('File ',{' '},EEG.setname,{' '},'completed!'))
     clearvars -except EEG PARAM filename pathname resultDir
