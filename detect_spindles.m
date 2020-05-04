@@ -33,8 +33,10 @@ function [EEG, marker] = detect_spindles(EEG,PARAM)
 
 %% basic options
 % for dependencies
+clc
 addpath('./src')
-addpath(genpath('./eeglab13_2_2b'))
+addpath('./eeglab2019_1')
+eeglab; close; clear; % to automatically add the necessary paths
 % input arguments
 if nargin < 1; EEG = []; end
 if nargin < 2; PARAM.emptyparam = 1; end
@@ -42,10 +44,13 @@ if nargin < 2; PARAM.emptyparam = 1; end
 %% CUSTOM PARAMETERS
 if PARAM.emptyparam == 1
     PARAM = struct(...
-        'PB_forder',1 ... order for the first low pass filter. Default [1].
+        'cdemodORrms',1 ... use complex demodulation [1], or root mean square [0] to extract frequency of interest. Default: [1].
+        ,'PB_forder',1 ... order for the first low pass filter. Default [1].
         ,'cdemod_freq', 13.5 ...    central frequency (i.e. Carrier frequency in Hz) for the complex demodulation. Default: [13.5].
-        ,'cdemod_filter_lowpass', 5 ... cutoff frequency for the low pass filter in CD. Default: [5].
+        ,'cdemod_filter_lowpass', 5 ... bandwidth about central frequency in CD. Default: [5].
         ,'cdemod_forder', 4 ...    filter order for the complex demodulation. Default: [4].
+        ,'rmshp', 11 ... high pass filter if using rms. Default: [11].
+        ,'rmslp', 16 ... low pass filter if using rms. Default: [16].
         ,'channels_of_interest',{{'Fz','Cz','Pz'}} ... selected channels. Default: {{'Fz','Cz','Pz'}}
         ,'ZSwindowlength', 60 ... window for ZSCORE (in seconds). Default: [60].
         ,'ZSThreshold', 2.33 ... Threshold for the ZScore. Default: [2.33].
@@ -58,8 +63,7 @@ if PARAM.emptyparam == 1
         ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.
         ,'badData', {{'Movement'}} ... name for movement artifact. Default: {{'Movement'}}.
         ,'save_result_file','.csv' ... file type to save markers to a file. If empty []: popup window. Default: {{'.csv'}}
-        ,'save_mat_file', [] ... set to = 1 to save EEG, markers and PARAM to a .mat file, set empty [] for none. Default: [].
-        ,'save_set_file', 1 ... set to = 1 to save EEG to a .set file. , set empty [] for none. Default: [1].
+        ,'save', 1 ... set to = 1 to save to eeglab .set dataset [1] or EEG, markers and PARAM to a .mat file [0]. Default: [1].
         ,'output_allfiles', 0 ... set at 1 if you want the complete results with all steps. Note EEG struct will be different dimentions. Default: [0].
         ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
         );
@@ -80,17 +84,16 @@ end
 %% Open interface to select *.mat file(s)
 if isempty(pathname)
     if isempty(EEG)
-        [filename,pathname] = uigetfile2(   {'*.mat', 'eeglab mat file (*.MAT)'; ...
-            '*.set', 'EEGlab Dataset (*.SET)'; ...
-            '*.*', 'All Files (*.*)'}, ...
-            'Choose files to process', ...
-            'Multiselect', 'on');
-        
+    [filename, pathname] = uigetfile2( ...
+        {'*.set','EEGlab Dataset (*.set)'; ...
+        '*.mat','MAT-files (*.mat)'; ...
+        '*.*',  'All Files (*.*)'}, ...
+        'multiselect', 'on');
     end
 end
 
 % check the filename(s)
-if isequal(filename,0) % no files were selected
+if isequal(filename,0) || isequal(pathname,0) % no files were selected
     disp('User selected Cancel')
     return;
 else
@@ -152,12 +155,13 @@ for nfile = 1:length(filename)
     
     %% saving results
     % for a mat file:
-    if ~isempty(PARAM.save_mat_file)
+    if PARAM.save == 0
         save([OutputPath, OutputFile],'EEG','marker','PARAM');
-    end
     % for a set file:
-    if ~isempty(PARAM.save_set_file)
+    elseif PARAM.save == 1
         pop_saveset(EEG, 'filename', OutputFile, 'filepath', OutputPath, 'savemode', 'onefile');
+    else
+        error('Output file type not selected')
     end
     disp(strcat('File ',{' '},EEG.setname,{' '},'completed!'))
     clearvars -except EEG PARAM filename pathname resultDir
@@ -165,5 +169,5 @@ end
 
 disp('SPINDLE DETECTION COMPLETE!')
 toc
-
+clear
 end
