@@ -1,4 +1,4 @@
-function [ZS, markers] = DS_Threshold_simple_new(ZS,PARAM)
+function [ZS, markers] = DS_Threshold(ZS,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

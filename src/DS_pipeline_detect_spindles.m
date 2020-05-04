@@ -30,6 +30,7 @@ function [EEG, marker, PARAM] = DS_pipeline_detect_spindles(EEG,PARAM,OutputFile
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % just for debug, or if you need to keep each processing step :
 Output_All = 0;
 if isfield(PARAM,'output_allfiles')
@@ -44,42 +45,53 @@ fprintf(1,'%s\n',['------------------------ ' datestr(t0) ' --------------------
 
 % Check data format for compatibility. Ensure EEG.data are double (filtfilt requirement). This also resolves other related issues.
 EEG.data = double(EEG.data);
-
 if Output_All
     ALLEEG(1) = EEG;
     ALLEEG(1).setname = 'raw data';
 end
 
-%% 1) COMPLEX DEMODULATION
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 1: COMPLEX DEMODULATION');
+%% 1) COMPLEX DEMODULATION OR RMS
 
-% delete the previous mrk in the new struct
-EEGcd = EEG;
-EEGcd.event = [];
-EEGcd.urevent = [];
-
-% 1 a) channels choice - NOTE: I moved this before line 119, to make CD step faster.
+% 1a) channels of interest
 if ~isempty(PARAM.channels_of_interest)
-    EEGcd = DS_extract_ChOI(EEGcd,PARAM);
+    EEGcoi = DS_extract_ChOI(EEG,PARAM);
 end
 
-EEGcd = DS_complexDemodulation(EEGcd,PARAM);
-
-if Output_All
-    ALLEEG(2) = EEGcd;
-    ALLEEG(2).setname = 'ComplexDemod';
+% 1b) if complex demodulation is your preference
+if PARAM.cdemodORrms == 1
+    fprintf(1,'%s\n',' ');
+    fprintf(1,'%s\n','STEP 1: COMPLEX DEMODULATION');
+    EEGfreq = DS_complexDemodulation(EEGcoi,PARAM);
+    if Output_All
+        ALLEEG(2) = EEGfreq;
+        ALLEEG(2).setname = 'ComplexDemod';
+    end
+% 1c) if RMS is your weapon of choice
+elseif PARAM.cdemodORrms == 0
+    fprintf(1,'%s\n',' ');
+    fprintf(1,'%s\n','STEP 1: ROOT MEAN SQUARE TRANSFORMATION');
+    EEGfreq = DS_rms(EEGcoi,PARAM);
+    if Output_All
+        ALLEEG(2) = EEGfreq;
+        ALLEEG(2).setname = 'RMS';
+    end
+else
+    error('Please choose either complex demodulate or RMS to extract frequencies of interest.')
 end
 
 t1 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t1,t0)) ' sec.']);
 
 %% 2) Z-SCORE NORMALIZATION
+
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 2: Z-SCORE NORMALIZATION');
 
-EEGz = DS_Zscore(EEGcd,PARAM);
+% 2a) set data during movements to NaN so they don't contaminate normalization 
+EEGnan = DS_NaNbadData(EEGfreq,PARAM);
 
+% 2b) Signal normalization
+EEGz = DS_Zscore_new(EEGnan,PARAM);
 if Output_All
     ALLEEG(3) = EEGz;
     ALLEEG(3).setname = 'ZScore';
@@ -92,14 +104,22 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)/60) ' min.']);
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 3: SPINDLE DETECTION');
 
-[EEGs, marker] = DS_Threshold_simple_new(EEGz,PARAM);
+% delete the previous mrk in the new struct
+EEGs.event = [];
+EEGs.urevent = [];
+EEGs = EEGz;
+
+% detect spindles
+[EEGs, marker] = DS_Threshold(EEGs,PARAM);
+if Output_All
+    ALLEEG(4) = EEGs;
+    ALLEEG(4).setname = 'ZScore_with_spindles';
+end
 
 % spindle merge events back with existing events and original data:
 EEG = DS_merge_event(EEG,EEGs);
 
 if Output_All
-    ALLEEG(4) = EEGs;
-    ALLEEG(4).setname = 'ZScore_with_spindles';
     ALLEEG(5) = EEG;
     ALLEEG(5).setname = 'Raw_Data with Spindles';
 end
