@@ -1,4 +1,5 @@
 function [com] = pop_eeglabel(EEG)
+
 % pop_eeglabel() -  Opens an EEGPLOT window with a button that allows the
 % labeling of EEG periods. 
 %

@@ -1,4 +1,5 @@
 function vers = eegplugin_markevents(fig, trystrs, catchstrs)
+
 % eegplugin_markevents() - EEGLAB plugin for event marking continuos data.
 %
 % Usage:
