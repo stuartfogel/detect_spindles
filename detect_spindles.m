@@ -55,7 +55,7 @@ if PARAM.emptyparam == 1
         ,'allsleepstages', {{'N1','N2','N3','R','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','R','W','unscored'}}.
         ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.
         ,'badData', {{'Movement'}} ... name for movement artifact. Default: {{'Movement'}}.
-        ,'save_result_file','.csv' ... file type to save markers to a file. If empty []: popup window. Default: {{'.csv'}}
+        ,'save_result_file', 1 ... file type to save markers to a file. If empty [], none.
         ,'save', 1 ... set to = 1 to save to eeglab .set dataset [1] or EEG, markers and PARAM to a .mat file [0]. Default: [1].
         ,'output_allfiles', 0 ... set at 1 if you want the complete results with all steps. Note EEG struct will be different dimentions. Default: [0].
         ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
@@ -65,6 +65,7 @@ end
 %% RUN PIPELINE
 if length(EEG)>1
     for iSet = 1:length(EEG)
+    disp(strcat('Processing file ',{' '},EEG(iSet).setname))
         [EEG(iSet)] = DS_pipeline_detect_spindles(EEG(iSet),PARAM);
     end
 else
@@ -75,6 +76,7 @@ end
 %% SAVE RESULTS
 if length(EEG)>1
     for iSet = 1:length(EEG)
+        disp(strcat('Saving file ',{' '},EEG(iSet).setname,'_SpDet.set'))
         EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',[EEG(iSet).setname '_SpDet'],'savemode', 'onefile');
     end
 else
