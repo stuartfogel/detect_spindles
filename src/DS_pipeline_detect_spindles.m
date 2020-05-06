@@ -172,14 +172,10 @@ if isfield(PARAM,'save_result_file')
     if isempty(PARAM.save_result_file)
         [OutputFile, OutputPath] = uiputfile({'*.csv','CSV Files (*.csv)';'*.*','All Files'},'Export MarkerFiles ?');
         if OutputFile ~= 0
-            if strcmp(ext,'.csv')
-                export_Spindles_csv([OutputPath OutputFile ext],EEG);
-            end
-        end
-    elseif ~isempty(PARAM.save_result_file)
-        if strcmp(PARAM.save_result_file,'.csv')
             export_Spindles_csv([OutputPath OutputFile '.csv'],EEG);
         end
+    elseif ~isempty(PARAM.save_result_file)
+        export_Spindles_csv([OutputPath OutputFile '.csv'],EEG);
     end
 end
 
