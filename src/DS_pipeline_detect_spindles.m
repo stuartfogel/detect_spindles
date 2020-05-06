@@ -33,7 +33,7 @@ function [EEG] = DS_pipeline_detect_spindles(EEG,PARAM)
 %% 0) Start pipeline
 t0 = clock; % start time
 fprintf(1,'%s\n',['------------------------ ' datestr(t0) ' ------------------------']);
-fprintf(1,'%s\n',['Processing file ' EEG(iSet).setname]);
+fprintf(1,'%s\n',['Processing file ' EEG.setname]);
 % Check data format for compatibility. Ensure EEG.data are double (filtfilt requirement). This also resolves other related issues.
 EEG.data = double(EEG.data);
 
