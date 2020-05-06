@@ -65,7 +65,6 @@ end
 %% RUN PIPELINE
 if length(EEG)>1
     for iSet = 1:length(EEG)
-    disp(strcat('Processing file ',{' '},EEG(iSet).setname))
         [EEG(iSet)] = DS_pipeline_detect_spindles(EEG(iSet),PARAM);
     end
 else
@@ -76,7 +75,7 @@ end
 %% SAVE RESULTS
 if length(EEG)>1
     for iSet = 1:length(EEG)
-        disp(strcat('Saving file ',{' '},EEG(iSet).setname,'_SpDet.set'))
+        fprintf(1,'%s\n',['Saving file ' EEG(iSet).setname '_SpDet.set']);
         EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',[EEG(iSet).setname '_SpDet'],'savemode', 'onefile');
     end
 else
