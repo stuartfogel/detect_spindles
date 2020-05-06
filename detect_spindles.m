@@ -30,7 +30,7 @@ function [EEG] = detect_spindles(EEG,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% input arguments
+%% INPUT ARGUMENTS
 if nargin < 1; EEG = []; end
 if nargin < 2; PARAM.emptyparam = 1; end
 
@@ -62,17 +62,23 @@ if PARAM.emptyparam == 1
         );
 end
 
-%% real pipeline
+%% RUN PIPELINE
 if length(EEG)>1
-    for iRun = 1:length(EEG)
-        [EEG(iRun)] = DS_pipeline_detect_spindles(EEG(iRun),PARAM);
+    for iSet = 1:length(EEG)
+        [EEG(iSet)] = DS_pipeline_detect_spindles(EEG(iSet),PARAM);
     end
 else
     [EEG] = DS_pipeline_detect_spindles(EEG,PARAM);
     eeg_checkset(EEG);
 end
 
-% promp to save results
-pop_saveset(EEG);
+%% SAVE RESULTS
+if length(EEG)>1
+    for iSet = 1:length(EEG)
+        EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',[EEG(iSet).setname '_SpDet'],'savemode', 'onefile');
+    end
+else
+    EEG = pop_saveset(EEG,'filepath',EEG.filepath,'filename',[EEG.setname '_SpDet'],'savemode', 'onefile');
+end
 
 end
