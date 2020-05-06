@@ -1,6 +1,8 @@
-# detect_spindles
+# detect_spindles_plugin
 
-Method for detecting sleep spindles using EEGlab for MATLAB
+Method for detecting sleep spindles using GUI in EEGlab for MATLAB
+
+Installation: Copy 'detect_spindles_plugin' to '~/eeglab/plugins/'
 
 Authors: Stephane Sockeel, PhD, University of Montreal; Stuart Fogel, PhD, University of Ottawa.
 
