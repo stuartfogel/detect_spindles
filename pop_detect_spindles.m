@@ -126,11 +126,11 @@ if ~isempty(result)
         ,'cdemodORrms', result{13} ...
         ,'channels_of_interest', {strsplit(result{14})} ...
         ... defaults
-        ,'PB_forder', 1 ... order for the first low pass filter. Default [1].
+        ,'PB_forder', 1 ... order for the first low pass filter. Default: [1].
         ,'cdemod_forder', 4 ... filter order for the complex demodulation. Default: [4].
         ,'ZSBeginThreshold', 0.1 ... Value to detect the begining of spindles. Default: [0.1-0.25].
         ,'ZSResetThreshold', 0.1 ... Value for the reset. Default: [0.1-0.25].
-        ,'save_result_file', 1 ... file type to save markers to a file. If empty []: popup window. Default: {{'.csv'}}
+        ,'save_result_file', 1 ... file type to save markers to a file. If empty [], none. Default: [1].
         ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
         );
     % launch pipeline
