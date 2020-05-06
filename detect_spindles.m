@@ -1,4 +1,4 @@
-function [EEG, marker] = detect_spindles(EEG,PARAM)
+function [EEG] = detect_spindles(EEG,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -8,7 +8,6 @@ function [EEG, marker] = detect_spindles(EEG,PARAM)
 %           PARAM = structure of parameters (see below)
 %
 % OUTPUT:   EEG = same structure with spindle markers (EEG.event)
-%           marker = spindle markers
 %
 % Authors:  Stephane Sockeel, PhD, University of Montreal
 %           Stuart Fogel, PhD, University of Ottawa
@@ -31,13 +30,7 @@ function [EEG, marker] = detect_spindles(EEG,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% basic options
-% for dependencies
-clc
-addpath('./src')
-addpath('./eeglab2019_1')
-eeglab; close; clear; % to automatically add the necessary paths
-% input arguments
+%% input arguments
 if nargin < 1; EEG = []; end
 if nargin < 2; PARAM.emptyparam = 1; end
 
@@ -69,105 +62,17 @@ if PARAM.emptyparam == 1
         );
 end
 
-%% Specify Filename(s)
-% you can manually specify filenames here, or leave empty for pop-up
-if isempty(EEG)
-    pathname = '';
-    filename = {'',...
-        ''
-        };
+%% real pipeline
+if length(EEG)>1
+    for iRun = 1:length(EEG)
+        [EEG(iRun)] = DS_pipeline_detect_spindles(EEG(iRun),PARAM);
+    end
 else
-    pathname = EEG.filepath;
-    filename = EEG.filename;
+    [EEG] = DS_pipeline_detect_spindles(EEG,PARAM);
+    eeg_checkset(EEG);
 end
 
-%% Open interface to select *.mat file(s)
-if isempty(pathname)
-    if isempty(EEG)
-    [filename, pathname] = uigetfile2( ...
-        {'*.set','EEGlab Dataset (*.set)'; ...
-        '*.mat','MAT-files (*.mat)'; ...
-        '*.*',  'All Files (*.*)'}, ...
-        'multiselect', 'on');
-    end
-end
+% promp to save results
+pop_saveset(EEG);
 
-% check the filename(s)
-if isequal(filename,0) || isequal(pathname,0) % no files were selected
-    disp('User selected Cancel')
-    return;
-else
-    if ischar(filename) % only one file was selected
-        filename = cellstr(filename); % put the filename in the same cell structure as multiselect
-    end
-end
-
-%% Output directory
-% Specify output directory, or leave empty to use pop-up
-resultDir = '';
-
-if isempty(resultDir)
-    disp('Please select a directory in which to save the results.');
-    resultDir = uigetdir('', 'Select the directory in which to save the results');
-end
-
-tic
-
-for nfile = 1:length(filename)
-    
-    %% Load EEG files
-    
-    [path,name,ext] = fileparts(char(strcat(pathname, filename(nfile))));
-    
-    if strfind(ext,'.vhdr')
-        % import Brain Broducts to eeglab
-        EEG = pop_loadbv(pathname,char(filename(nfile)));
-    elseif strfind(ext,'.mat')
-        % load mat
-        EEG = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
-    elseif strfind(ext,'.set')
-        % load eeglab
-        EEG = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
-    else
-        error('Unknown file type!')
-    end
-    
-    % display file loaded
-    disp(strcat('File ',{' '},filename{1,nfile},{' '},'loaded'))
-    
-    % fill important file info
-    EEG.setname = char(strcat(name,'_spDet'));
-    EEG.filename = char(strcat(EEG.setname,'.set'));
-    EEG.filepath = [resultDir,filesep];
-    OutputPath = [resultDir,filesep];
-    OutputFile = EEG.setname;
-    
-    %% real pipeline
-    if length(EEG)>1
-        marker = cell(1,length(EEG));
-        for iRun = 1:length(EEG)
-            [EEG(iRun), marker{iRun}, PARAM] = DS_pipeline_detect_spindles(EEG(iRun),PARAM,OutputFile(iRun),OutputPath(iRun));
-        end
-    else
-        [EEG, marker, PARAM] = DS_pipeline_detect_spindles(EEG,PARAM,OutputFile,OutputPath);
-        eeg_checkset(EEG);
-    end
-    
-    %% saving results
-    % for a mat file:
-    if PARAM.save == 0
-        save([OutputPath, OutputFile],'EEG','marker','PARAM');
-    % for a set file:
-    elseif PARAM.save == 1
-        pop_saveset(EEG, 'filename', OutputFile, 'filepath', OutputPath, 'savemode', 'onefile');
-    else
-        error('Output file type not selected')
-    end
-    disp(strcat('File ',{' '},EEG.setname,{' '},'completed!'))
-    clearvars -except EEG PARAM filename pathname resultDir
-end
-
-disp('SPINDLE DETECTION COMPLETE!')
-toc
-clear
 end
