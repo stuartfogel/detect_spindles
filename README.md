@@ -2,8 +2,8 @@
 
 Method for detecting sleep spindles using EEGlab for MATLAB
 
-**IMPORTANT NOTE: THIS VERSION IS NO LONGER MAINTAINED**
-**USE BRANCH VERSION INSTEAD:**
+**IMPORTANT NOTE: THIS VERSION IS NO LONGER MAINTAINED.**  
+**USE 'detect_spindles_plugin' BRANCH VERSION INSTEAD:**  
 **https://github.com/stuartfogel/detect_spindles.git**
 
 Authors: Stephane Sockeel, PhD, University of Montreal; Stuart Fogel, PhD, University of Ottawa.
