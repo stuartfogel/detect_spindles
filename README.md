@@ -8,9 +8,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Mac, PC and Linux compatible.
-Designed for use with EEGlab 2019_1 on Matlab R2019a.
-For use on continuous eeglab datasets (*.set).
+Mac, PC and Linux compatible.  
+Designed for use with EEGlab 2019_1 on Matlab R2019a.  
+For use on continuous eeglab datasets (*.set).  
 Requires sleep scoring and movement artifacts to be included in EEG.event structure.
 
 ### Installing
@@ -31,17 +31,17 @@ There are two options:
 
 ## Authors
 
-Stephane Sockeel, PhD, University of Montreal
+Stephane Sockeel, PhD, University of Montreal  
 Stuart Fogel, PhD, University of Ottawa
 
 ## Contact 
 
-sfogel@uottawa.ca
+sfogel@uottawa.ca  
 http://socialsciences.uottawa.ca/sleep-lab/
 
 ## License
 
-Copyright (C) Stuart Fogel & Stephane Sockeel, 2016, 2020.
+Copyright (C) Stuart Fogel & Stephane Sockeel, 2016, 2020.  
 See the GNU General Public License for more details.
 
 ## Acknowledgments
