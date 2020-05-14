@@ -25,7 +25,7 @@ function vers = eegplugin_detect_spindles(fig, trystrs, catchstrs)
 % Copyright (C) <2020>  Stuart Fogel, http://socialsciences.uottawa.ca/sleep-lab/
 %
 
-vers = '2.0';
+vers = '2.1';
 if nargin < 3
     error('eegplugin_detect_spindles requires 3 arguments');
 end
