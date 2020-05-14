@@ -1,4 +1,4 @@
-function EEG = detect_spindles_batch()
+function ALLEEG = detect_spindles_batch()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -18,6 +18,13 @@ function EEG = detect_spindles_batch()
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% LOAD EEGLAB
+if ~isempty(which('eeglab'))
+    eeglab;
+else
+    error('Add top folder for eeglab to the path')
+end
 
 %% CUSTOM PARAMETERS
 
@@ -41,8 +48,7 @@ PARAM = struct(...
     ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.
     ,'badData', {{'Movement'}} ... name for movement artifact. Default: {{'Movement'}}.
     ,'save_result_file', 1 ... file type to save markers to a file. If empty [], none.
-    ,'save', 1 ... set to = 1 to save to eeglab .set dataset [1] or EEG, markers and PARAM to a .mat file [0]. Default: [1].
-    ,'output_allfiles', 0 ... set at 1 if you want the complete results with all steps. Note EEG struct will be different dimentions. Default: [0].
+    ,'suffix', {'SpDet'} ... file suffix for output dataset. Default: {'SpDet'}.
     ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
     );
 
@@ -75,11 +81,12 @@ else
 end
 
 %% BUILD EEG BATCH AND LAUNCH SPINDLE DETECTION
-
+EEG = eeg_emptyset();
 for nfile = 1:length(filename)
-    EEG(nfile) = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
+    EEG = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
+    ALLEEG(nfile) = EEG;
 end
 
-EEG = detect_spindles(EEG, PARAM);
+ALLEEG = detect_spindles(ALLEEG,PARAM);
 
 end

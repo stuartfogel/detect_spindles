@@ -131,7 +131,7 @@ fprintf(1,'%s\n','STEP 7: EXPORT SPINDLE MARKERS');
 
 if isfield(PARAM,'save_result_file')
     if ~isempty(PARAM.save_result_file)
-        export_Spindles_csv([EEG.filepath filesep EEG.setname '.csv'],EEG);
+        export_Spindles_csv(EEG,PARAM);
     end
 end
 

@@ -15,7 +15,7 @@ function vers = eegplugin_detect_spindles(fig, trystrs, catchstrs)
 %   help message of eegplugin_besa() or visit http://www.sccn.ucsd.edu/eeglab/contrib.html
 %
 % See also:
-%   EEGLABEL, POP_EEGLABEL, EEGLAB
+%   detect_spindles, pop_detect_spindles, eeglab
 %
 % Author: 
 %   Stuart Fogel <sfogel@uottawa.ca>
@@ -45,9 +45,9 @@ menu = findobj(fig, 'tag', 'tools');
 
 % menu callbacks
 % --------------
-detect_spidndle_cback = [ trystrs.no_check '[LASTCOM] = pop_detect_spindles(EEG);' catchstrs.add_to_hist ];
+detect_spindle_cback = [ trystrs.no_check '[EEG,LASTCOM] = pop_detect_spindles(EEG);[ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET);eeglab redraw;' catchstrs.add_to_hist ];
 
 % create menus if necessary
 % -------------------------
 submenu = uimenu( menu, 'Label', 'Detect Spindles');
-uimenu( submenu, 'Label', 'Detect Spindles', 'CallBack', detect_spidndle_cback);
+uimenu( submenu, 'Label', 'Detect Spindles', 'CallBack', detect_spindle_cback);
