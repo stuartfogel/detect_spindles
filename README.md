@@ -27,7 +27,7 @@ There are two options:
 * load an eeglab dataset
 * navigate to Tools>Detect Spindles>Detect Spindles>
 
-2) Customize and run ‘detect_spindles_batch.m’ to process multiple datasets.
+2) Customize and run 'detect_spindles_batch.m' to process multiple datasets.
 
 ## Authors
 
