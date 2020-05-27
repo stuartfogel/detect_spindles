@@ -1,4 +1,4 @@
-function export_Spindles_csv(FileName,EEG)
+function export_Spindles_csv(EEG,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -54,7 +54,7 @@ end
 
 NameFields = fieldnames(Mrk);
 nbFields = length(NameFields);
-
+FileName = [EEG.filepath EEG.setname '.csv'];
 fid = fopen(FileName,'w');
 
 towrite = '';
@@ -68,7 +68,7 @@ fprintf(fid,'%s\n',towrite);
 
 for iMrk = 1:nbMrk
     towrite = '';
-    if strcmpi(Mrk(iMrk).type,'Spindle')
+    if strcmpi(Mrk(iMrk).type,PARAM.eventName)
         for i = 1:nbFields
             towrite  = [towrite instring(Mrk(iMrk).(NameFields{i})) ','];
         end

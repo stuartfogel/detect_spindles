@@ -1,4 +1,4 @@
-function [EEG , PARAM]= DS_complexDemodulation(EEG,PARAM)
+function [EEG,PARAM] = DS_complexDemodulation(EEG,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

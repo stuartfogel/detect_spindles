@@ -1,23 +1,12 @@
-function [EEG] = detect_spindles(EEG,PARAM)
+function ALLEEG = detect_spindles_batch()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Detect Spindles in EEG data
-%
-% INPUT:    EEG = EEGLab structure
-%           PARAM = structure of parameters (see below)
-%
-% OUTPUT:   EEG = same structure with spindle markers (EEG.event)
-%
-% Authors:  Stephane Sockeel, PhD, University of Montreal
-%           Stuart Fogel, PhD, University of Ottawa
-%           Thanks to support from Julien Doyon and input from Arnaud Bore.
-%           Copyright (C) Stuart fogel & Stephane Sockeel, 2016
-%           See the GNU General Public License for more details.
+% Build EEG structure from multiple EEG datasets to batch run detect_spindles
 %
 % Contact:  sfogel@uottawa.ca
 %
-% Date:     June 8, 2016
+% Date:     May 6, 2020
 %
 % Citation: Ray, L.B., Sockeel, S., Soon, M., Bore, A., Myhr, A.,
 %           Stojanoski, B., Cusack, R., Owen, A.M., Doyon, J., Fogel, S.,
@@ -30,13 +19,16 @@ function [EEG] = detect_spindles(EEG,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% INPUT ARGUMENTS
-if nargin < 1; EEG = []; end
-if nargin < 2; PARAM.emptyparam = 1; end
+%% LOAD EEGLAB
+if ~isempty(which('eeglab'))
+    eeglab;
+else
+    error('Add top folder for eeglab to the path')
+end
 
 %% CUSTOM PARAMETERS
-if PARAM.emptyparam == 1
-    PARAM = struct(...
+
+PARAM = struct(...
     'cdemodORrms',1 ... use complex demodulation [1], or root mean square [0] to extract frequency of interest. Default: [1].
     ,'PB_forder',1 ... order for the first low pass filter. Default [1].
     ,'cdemod_freq', 13.5 ...    central frequency (i.e. Carrier frequency in Hz) for the complex demodulation. Default: [13.5].
@@ -59,28 +51,42 @@ if PARAM.emptyparam == 1
     ,'suffix', {'SpDet'} ... file suffix for output dataset. Default: {'SpDet'}.
     ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
     );
+
+%% SPECIFY FILENAMES (OPTIONAL)
+
+% you can manually specify filenames here, or leave empty for pop-up
+pathname = '';
+filename = {'',...
+    ''
+    };
+
+%% MANUALLY SELECT *.MAT FILES
+
+if isempty(pathname)
+    [filename, pathname] = uigetfile2( ...
+        {'*.set','EEGlab Dataset (*.set)'; ...
+        '*.mat','MAT-files (*.mat)'; ...
+        '*.*',  'All Files (*.*)'}, ...
+        'multiselect', 'on');
 end
 
-%% RUN PIPELINE
-if length(EEG)>1
-    for iSet = 1:length(EEG)
-        EEG(iSet).setname = [EEG(iSet).setname '_' PARAM.suffix]; % update setname
-        [EEG(iSet)] = DS_pipeline_detect_spindles(EEG(iSet),PARAM);
-    end
+% check the filename(s)
+if isequal(filename,0) || isequal(pathname,0) % no files were selected
+    disp('User selected Cancel')
+    return;
 else
-    EEG.setname = [EEG.setname '_' PARAM.suffix]; % update setname
-    [EEG] = DS_pipeline_detect_spindles(EEG,PARAM);
-    eeg_checkset(EEG);
+    if ischar(filename) % Only one file was selected. That's odd. Why would you use this script?
+        filename = cellstr(filename); % Anyhoo... put the filename in the same cell structure as multiselect
+    end
 end
 
-%% SAVE RESULTS
-if length(EEG)>1 % batch mode
-    for iSet = 1:length(EEG)
-        fprintf(1,'%s\n',['Saving file ' EEG(iSet).setname '.set']);
-        EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',EEG(iSet).setname,'savemode','onefile');
-    end
-else
-    fprintf(1,'%s\n',['Saving file ' EEG.setname '.set']);
+%% BUILD EEG BATCH AND LAUNCH SPINDLE DETECTION
+EEG = eeg_emptyset();
+for nfile = 1:length(filename)
+    EEG = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
+    ALLEEG(nfile) = EEG;
 end
+
+ALLEEG = detect_spindles(ALLEEG,PARAM);
 
 end
