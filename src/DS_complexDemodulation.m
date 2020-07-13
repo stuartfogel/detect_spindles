@@ -40,7 +40,7 @@ for iChan = 1:EEG.nbchan
         end
         x = smoothing(x,EEG.srate/PARAM.cdemod_freq);
         EEG.data(iChan, :, iTrial) = (real(x).^2 + imag(x).^2);
-        EEG.data(iChan, :, iTrial) = envelope(EEG.data(iChan, :, iTrial),EEG.srate/2,'rms'); % take the envelope of the CD peaks
+        % EEG.data(iChan, :, iTrial) = envelope(EEG.data(iChan, :, iTrial),EEG.srate/2,'rms'); % take the envelope of the CD peaks
     end
 end
 
