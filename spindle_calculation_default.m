@@ -161,17 +161,17 @@ for nfile = 1:length(PARAM.filename)
             NumberAllType{nfile,nch,nstage} = sum(height([perStageData{nfile,nch,nstage};NumberAllType{nfile,nch,nstage}]));
             DurationAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.duration;DurationAllType{nfile,nch,nstage}]);
             FrequencyAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.frequency;FrequencyAllType{nfile,nch,nstage}]);
-            AmplitudeAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.peakAmplitude;AmplitudeAllType{nfile,nch,nstage}]);
+            AmplitudeAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.peak;AmplitudeAllType{nfile,nch,nstage}]);
             % slow spindles
             NumberSlow{nfile,nch,nstage,1} = sum(height([data{nfile,nch,nstage,1};NumberSlow{nfile,nch,nstage,1}]));
             DurationSlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.duration;DurationSlow{nfile,nch,nstage,1}]);
             FrequencySlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.frequency;FrequencySlow{nfile,nch,nstage,1}]);
-            AmplitudeSlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.peakAmplitude;AmplitudeSlow{nfile,nch,nstage,1}]);
+            AmplitudeSlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.peak;AmplitudeSlow{nfile,nch,nstage,1}]);
             % fast spindles
             NumberFast{nfile,nch,nstage,2} = sum(height([data{nfile,nch,nstage,2};NumberFast{nfile,nch,nstage,2}]));
             DurationFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.duration;DurationFast{nfile,nch,nstage,2}]);
             FrequencyFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.frequency;FrequencyFast{nfile,nch,nstage,2}]);
-            AmplitudeFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.peakAmplitude;AmplitudeFast{nfile,nch,nstage,2}]);
+            AmplitudeFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.peak;AmplitudeFast{nfile,nch,nstage,2}]);
         end
     end
 end
