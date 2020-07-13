@@ -35,7 +35,7 @@ if ~isempty(badIdx)
         EEG.data(:,Event(ibad).latency:Event(ibad).latency+Event(ibad).duration-1) = NaN;
     end
 else
-    warning('No bad data markers in your recording. You should be sure to movemnet artifact your data before spindle detection.')
+    warning('No bad data markers in your recording. You should be sure to movement artifact your data before spindle detection.')
 end
 clear Event badIdx ibad
 end
