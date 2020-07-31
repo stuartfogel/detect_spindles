@@ -62,24 +62,17 @@ if PARAM.emptyparam == 1
 end
 
 %% RUN PIPELINE
-if length(EEG)>1
+if length(EEG)>1 % batch mode
     for iSet = 1:length(EEG)
         EEG(iSet).setname = [EEG(iSet).setname '_' PARAM.suffix]; % update setname
         [EEG(iSet)] = DS_pipeline_detect_spindles(EEG(iSet),PARAM);
+        fprintf(1,'%s\n',['Saving file ' EEG(iSet).setname '.set']);
+        EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',EEG(iSet).setname,'savemode','onefile');
     end
 else
     EEG.setname = [EEG.setname '_' PARAM.suffix]; % update setname
     [EEG] = DS_pipeline_detect_spindles(EEG,PARAM);
     eeg_checkset(EEG);
-end
-
-%% SAVE RESULTS
-if length(EEG)>1 % batch mode
-    for iSet = 1:length(EEG)
-        fprintf(1,'%s\n',['Saving file ' EEG(iSet).setname '.set']);
-        EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',EEG(iSet).setname,'savemode','onefile');
-    end
-else
     fprintf(1,'%s\n',['Saving file ' EEG.setname '.set']);
 end
 
