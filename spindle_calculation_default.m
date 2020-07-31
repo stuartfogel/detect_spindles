@@ -181,17 +181,19 @@ for nch = 1:length(PARAM.channels)
     for nstage = 1:length(PARAM.stages)
         % create tables
         stageNames = PARAM.stages{nstage};
-        stageNames(isspace(stageNames)) = [];
+        stageNames(isspace(stageNames)) = []; % delete whitespace
+        chNames = char(PARAM.channels(nch));
+        chNames(strfind(chNames,'-')) = []; % delete hyphen (re; character not allowed)
         SummaryAll = table(ID', [NumberAllType{:,nch,nstage}]',[DurationAllType{:,nch,nstage}]',[FrequencyAllType{:,nch,nstage}]',[AmplitudeAllType{:,nch,nstage}]');
-        SummaryAll.Properties.VariableNames = {'ID',[char(PARAM.channels(nch)) '_' stageNames '_Number_'],[char(PARAM.channels(nch)) '_' stageNames '_Duration_'],[char(PARAM.channels(nch)) '_' stageNames '_Frequency_'],[char(PARAM.channels(nch)) '_' stageNames '_Amplitude_']};
+        SummaryAll.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
         SummarySlow = table(ID', [NumberSlow{:,nch,nstage,1}]',[DurationSlow{:,nch,nstage,1}]',[FrequencySlow{:,nch,nstage,1}]',[AmplitudeSlow{:,nch,nstage,1}]');
-        SummarySlow.Properties.VariableNames = {'ID',[char(PARAM.channels(nch)) '_' stageNames '_Number_'],[char(PARAM.channels(nch)) '_' stageNames '_Duration_'],[char(PARAM.channels(nch)) '_' stageNames '_Frequency_'],[char(PARAM.channels(nch)) '_' stageNames '_Amplitude_']};
+        SummarySlow.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
         SummaryFast = table(ID', [NumberFast{:,nch,nstage,2}]',[DurationFast{:,nch,nstage,2}]',[FrequencyFast{:,nch,nstage,2}]',[AmplitudeFast{:,nch,nstage,2}]');
-        SummaryFast.Properties.VariableNames = {'ID',[char(PARAM.channels(nch)) '_' stageNames '_Number_'],[char(PARAM.channels(nch)) '_' stageNames '_Duration_'],[char(PARAM.channels(nch)) '_' stageNames '_Frequency_'],[char(PARAM.channels(nch)) '_' stageNames '_Amplitude_']};
+        SummaryFast.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
         % write to xlsx
-        writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' char(PARAM.channels(nch)) char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryAll')
-        writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData' char(PARAM.channels(nch)) char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummarySlow')
-        writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData' char(PARAM.channels(nch)) char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryFast')
+        writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryAll')
+        writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummarySlow')
+        writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryFast')
     end
 end
 
