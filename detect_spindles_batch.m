@@ -1,4 +1,4 @@
-function ALLEEG = detect_spindles_batch()
+function [ALLEEG] = detect_spindles_batch()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -60,7 +60,7 @@ filename = {'',...
     ''
     };
 
-%% MANUALLY SELECT *.MAT FILES
+%% MANUALLY SELECT *.SET FILES
 
 if isempty(pathname)
     [filename, pathname] = uigetfile2( ...
@@ -76,12 +76,11 @@ if isequal(filename,0) || isequal(pathname,0) % no files were selected
     return;
 else
     if ischar(filename) % Only one file was selected. That's odd. Why would you use this script?
-        filename = cellstr(filename); % Anyhoo... put the filename in the same cell structure as multiselect
+        error('Only one dataset selected. Batch mode is for multiple datasets.')
     end
 end
 
 %% BUILD EEG BATCH AND LAUNCH SPINDLE DETECTION
-EEG = eeg_emptyset();
 for nfile = 1:length(filename)
     EEG = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
     ALLEEG(nfile) = EEG;
