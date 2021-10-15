@@ -74,6 +74,9 @@ PARAM.resultDir = resultDir;
 clear filename pathname resultDir
 
 %% Separate into spindles from specified duration, channel, stage, type (defined above)
+
+[tables, data] = deal(cell(size(PARAM.filename))); % preallocate temp holding vars for loading data
+
 for nfile = 1:length(PARAM.filename)
     % read in raw data to table format
     tables{nfile} = readtable([char(PARAM.pathname) char(PARAM.filename(nfile))]);
@@ -108,6 +111,34 @@ warning( 'off', 'MATLAB:xlswrite:AddSheet' );
 
 %% Export per channel per stage per type to excel
 for nch = 1:length(PARAM.channels)
+    % NREM stages combined
+    allTypeFilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_NREM_all.xlsx']; % all spindle type
+    slowfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_NREM_slow.xlsx']; % slow spindles
+    fastfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_NREM_fast.xlsx']; % fast spindles
+    for nfile = 1:length(PARAM.filename)
+        % export to excel individual data
+        sheetname = char(PARAM.filename(nfile)); % create worksheet name from filename
+        sheetname = sheetname(1:end-4); % remove filetype from filename
+        sheetname(isspace(sheetname)) = []; % remove any spaces from sheetname
+        % write to xlsx
+        if length(sheetname)>30
+            error('Input file name too long. Please rename files with shorter names.')
+        else
+            fprintf('Exporting "%s" spindle data during NREM - #%.2i of %.2i...\n', PARAM.channels{nch}, nfile, length(PARAM.filename))
+             % export all spindle info to Excel
+            writetable(vertcat(perStageData{nfile,nch,:}), allTypeFilename, 'Sheet', sheetname)
+            writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
+             % export slow spindle info
+            writetable(vertcat(data{nfile,nch,:,1}),slowfilename,'Sheet',sheetname)
+            writetable(struct2table(PARAM),slowfilename,'Sheet',1)
+             % export fast spindle info
+            writetable(vertcat(data{nfile,nch,:,2}),fastfilename,'Sheet',sheetname)
+            writetable(struct2table(PARAM),fastfilename,'Sheet',1)
+        end
+    end
+    clear allTypeFilename slowfilename fastfilename sheetname
+    
+     % NREM stages separately
     for nstage = 1:length(PARAM.stages)
         allTypeFilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '.xlsx']; % all spindle type
         slowfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '_slow.xlsx']; % slow spindles
@@ -121,6 +152,7 @@ for nch = 1:length(PARAM.channels)
             if length(sheetname)>30
                 error('Input file name too long. Please rename files with shorter names.')
             else
+                fprintf('Exporting "%s" spindle data during %s - #%.2i of %.2i...\n', PARAM.channels{nch}, PARAM.stages{nstage}, nfile, length(PARAM.filename))
                 writetable(perStageData{nfile,nch,nstage},allTypeFilename,'Sheet',sheetname)
                 writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
                 writetable(data{nfile,nch,nstage,1},slowfilename,'Sheet',sheetname)
@@ -136,7 +168,21 @@ clear allTypeFilename slowfilename fastfilename sheetname
 
 %% Export summary data to excel
 
-% create empty cell structures
+% create empty cell structures for NREM combined data
+NREM_NumberAllType{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_DurationAllType{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_FrequencyAllType{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_AmplitudeAllType{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_NumberSlow{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_DurationSlow{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_FrequencySlow{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_AmplitudeSlow{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_NumberFast{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_DurationFast{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_FrequencyFast{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_AmplitudeFast{length(PARAM.filename),length(PARAM.channels)} = [];
+
+% create empty cell structures for "stage divided" data
 NumberAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
 DurationAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
 FrequencyAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
@@ -153,6 +199,30 @@ AmplitudeFast{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)
 % calculate means for each channel, stage and type
 for nfile = 1:length(PARAM.filename)
     for nch = 1:length(PARAM.channels)
+        
+        % means for each channel and type for N2 and N3 combined
+        sheetname = char(PARAM.filename(nfile));
+        sheetname = sheetname(1:end-4);
+        NREM_ID{nfile} = sheetname;
+        
+         % all spindles for NREM sleep
+        NREM_NumberAllType{nfile, nch}   = height(vertcat(perStageData{nfile,nch,:}));
+        NREM_DurationAllType{nfile,nch}  = nanmean(vertcat(perStageData{nfile,nch,:}).duration);
+        NREM_FrequencyAllType{nfile,nch} = nanmean(vertcat(perStageData{nfile,nch,:}).frequency);
+        NREM_AmplitudeAllType{nfile,nch} = nanmean(vertcat(perStageData{nfile,nch,:}).amplitude);
+        
+         % slow spindles during NREM sleep
+        NREM_NumberSlow{nfile, nch}     = height(vertcat(data{nfile,nch,:,1}));
+        NREM_DurationSlow{nfile, nch}   = nanmean(vertcat(data{nfile,nch,:,1}).duration);
+        NREM_FrequencySlow{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,1}).frequency); 
+        NREM_AmplitudeSlow{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,1}).amplitude);
+        
+         % fast spindles during NREM sleep
+        NREM_NumberFast{nfile, nch}     = height(vertcat(data{nfile,nch,:,2}));
+        NREM_DurationFast{nfile, nch}   = nanmean(vertcat(data{nfile,nch,:,2}).duration);
+        NREM_FrequencyFast{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,2}).frequency);
+        NREM_AmplitudeFast{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,2}).amplitude);
+        
         for nstage = 1:length(PARAM.stages)
             sheetname = char(PARAM.filename(nfile));
             sheetname = sheetname(1:end-4);
@@ -178,6 +248,25 @@ end
 
 % Put it all in tables & write to excel
 for nch = 1:length(PARAM.channels)
+    
+    % write tables for N2 and N3 combined
+    chNames = PARAM.channels{nch};
+    chNames(strfind(chNames,'-')) = []; % delete hyphen (re; character not allowed)
+     % all spindles (slow and fast combined)
+    SummaryAll = table(NREM_ID', [NREM_NumberAllType{:,nch}]',[NREM_DurationAllType{:,nch}]',[NREM_FrequencyAllType{:,nch}]',[NREM_AmplitudeAllType{:,nch}]');
+    SummaryAll.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude']};
+     % slow spindles
+    SummarySlow = table(NREM_ID', [NREM_NumberSlow{:,nch}]',[NREM_DurationSlow{:,nch}]',[NREM_FrequencySlow{:,nch}]',[NREM_AmplitudeSlow{:,nch}]');
+    SummarySlow.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude']};
+     % fast spindles
+    SummaryFast = table(NREM_ID', [NREM_NumberFast{:,nch}]',[NREM_DurationFast{:,nch}]',[NREM_FrequencyFast{:,nch}]',[NREM_AmplitudeFast{:,nch}]');
+    SummaryFast.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude']};
+    % write to xlsx
+    fprintf('Writing summary tables for channel "%s" during NREM to Excel...\n', chNames)
+    writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummaryAll')
+    writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummarySlow')
+    writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummaryFast')
+    
     for nstage = 1:length(PARAM.stages)
         % create tables
         stageNames = PARAM.stages{nstage};
@@ -191,6 +280,7 @@ for nch = 1:length(PARAM.channels)
         SummaryFast = table(ID', [NumberFast{:,nch,nstage,2}]',[DurationFast{:,nch,nstage,2}]',[FrequencyFast{:,nch,nstage,2}]',[AmplitudeFast{:,nch,nstage,2}]');
         SummaryFast.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
         % write to xlsx
+        fprintf('Writing summary tables for channel "%s" during %s to Excel...\n', chNames, stageNames)
         writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryAll')
         writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummarySlow')
         writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryFast')
