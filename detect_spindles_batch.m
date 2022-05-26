@@ -20,10 +20,10 @@ function [ALLEEG] = detect_spindles_batch()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% LOAD EEGLAB
-if ~isempty(which('eeglab'))
+if isempty(which('eeglab'))
     eeglab;
-else
-    error('Add top folder for eeglab to the path')
+    close(gcf);
+    clear
 end
 
 %% CUSTOM PARAMETERS

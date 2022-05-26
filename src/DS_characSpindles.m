@@ -51,6 +51,7 @@ for iSpin = indSpindle
     data = EEG.data(Spindle.channel,sp_beg:sp_end);
     data_F = filtering(data, EEG.srate, PARAM);
     EEG.event(iSpin).amplitude = max(max(data_F)-min(data_F));
+    EEG.event(iSpin).area = sum(abs(data_F))*1/EEG.srate; % compute integrated amplitude, i.e., absolute area under the curve
     freq = mean(EEG.srate ./ [diff(find((diff(sign(diff(data_F))))>0)) ,  diff(find((diff(sign(diff(data_F))))<0))]);  % frequency : srate divided by the mean of distance btw max pos. peak or min neg. peak
     if PARAM.cdemod_freq - PARAM.cdemod_filter_lowpass/2 - 1 < 1 % for when trying to measure frequencies lower than 1Hz
         if any(isnan(freq))

@@ -173,28 +173,34 @@ NREM_NumberAllType{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_DurationAllType{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_FrequencyAllType{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_AmplitudeAllType{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_AreaAllType{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_NumberSlow{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_DurationSlow{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_FrequencySlow{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_AmplitudeSlow{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_AreaSlow{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_NumberFast{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_DurationFast{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_FrequencyFast{length(PARAM.filename),length(PARAM.channels)} = [];
 NREM_AmplitudeFast{length(PARAM.filename),length(PARAM.channels)} = [];
+NREM_AreaFast{length(PARAM.filename),length(PARAM.channels)} = [];
 
 % create empty cell structures for "stage divided" data
 NumberAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
 DurationAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
 FrequencyAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
 AmplitudeAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
+AreaAllType{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages)} = [];
 NumberSlow{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),1} = [];
 DurationSlow{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),1} = [];
 FrequencySlow{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),1} = [];
 AmplitudeSlow{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),1} = [];
+AreaSlow{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),1} = [];
 NumberFast{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),2} = [];
 DurationFast{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),2} = [];
 FrequencyFast{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),2} = [];
 AmplitudeFast{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),2} = [];
+AreaFast{length(PARAM.filename),length(PARAM.channels),length(PARAM.stages),2} = [];
 
 % calculate means for each channel, stage and type
 for nfile = 1:length(PARAM.filename)
@@ -210,18 +216,21 @@ for nfile = 1:length(PARAM.filename)
         NREM_DurationAllType{nfile,nch}  = nanmean(vertcat(perStageData{nfile,nch,:}).duration);
         NREM_FrequencyAllType{nfile,nch} = nanmean(vertcat(perStageData{nfile,nch,:}).frequency);
         NREM_AmplitudeAllType{nfile,nch} = nanmean(vertcat(perStageData{nfile,nch,:}).amplitude);
+        NREM_AreaAllType{nfile,nch} = nanmean(vertcat(perStageData{nfile,nch,:}).area);
         
          % slow spindles during NREM sleep
         NREM_NumberSlow{nfile, nch}     = height(vertcat(data{nfile,nch,:,1}));
         NREM_DurationSlow{nfile, nch}   = nanmean(vertcat(data{nfile,nch,:,1}).duration);
         NREM_FrequencySlow{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,1}).frequency); 
         NREM_AmplitudeSlow{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,1}).amplitude);
+        NREM_AreaSlow{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,1}).area);
         
          % fast spindles during NREM sleep
         NREM_NumberFast{nfile, nch}     = height(vertcat(data{nfile,nch,:,2}));
         NREM_DurationFast{nfile, nch}   = nanmean(vertcat(data{nfile,nch,:,2}).duration);
         NREM_FrequencyFast{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,2}).frequency);
         NREM_AmplitudeFast{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,2}).amplitude);
+        NREM_AreaFast{nfile, nch}  = nanmean(vertcat(data{nfile,nch,:,2}).area);
         
         for nstage = 1:length(PARAM.stages)
             sheetname = char(PARAM.filename(nfile));
@@ -232,16 +241,19 @@ for nfile = 1:length(PARAM.filename)
             DurationAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.duration;DurationAllType{nfile,nch,nstage}]);
             FrequencyAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.frequency;FrequencyAllType{nfile,nch,nstage}]);
             AmplitudeAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.amplitude;AmplitudeAllType{nfile,nch,nstage}]);
+            AreaAllType{nfile,nch,nstage} = mean([perStageData{nfile,nch,nstage}.area;AreaAllType{nfile,nch,nstage}]);
             % slow spindles
             NumberSlow{nfile,nch,nstage,1} = sum(height([data{nfile,nch,nstage,1};NumberSlow{nfile,nch,nstage,1}]));
             DurationSlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.duration;DurationSlow{nfile,nch,nstage,1}]);
             FrequencySlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.frequency;FrequencySlow{nfile,nch,nstage,1}]);
             AmplitudeSlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.amplitude;AmplitudeSlow{nfile,nch,nstage,1}]);
+            AreaSlow{nfile,nch,nstage,1} = mean([data{nfile,nch,nstage,1}.area;AreaSlow{nfile,nch,nstage,1}]);
             % fast spindles
             NumberFast{nfile,nch,nstage,2} = sum(height([data{nfile,nch,nstage,2};NumberFast{nfile,nch,nstage,2}]));
             DurationFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.duration;DurationFast{nfile,nch,nstage,2}]);
             FrequencyFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.frequency;FrequencyFast{nfile,nch,nstage,2}]);
             AmplitudeFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.amplitude;AmplitudeFast{nfile,nch,nstage,2}]);
+            AreaFast{nfile,nch,nstage,2} = mean([data{nfile,nch,nstage,2}.area;AreaFast{nfile,nch,nstage,2}]);
         end
     end
 end
@@ -253,14 +265,14 @@ for nch = 1:length(PARAM.channels)
     chNames = PARAM.channels{nch};
     chNames(strfind(chNames,'-')) = []; % delete hyphen (re; character not allowed)
      % all spindles (slow and fast combined)
-    SummaryAll = table(NREM_ID', [NREM_NumberAllType{:,nch}]',[NREM_DurationAllType{:,nch}]',[NREM_FrequencyAllType{:,nch}]',[NREM_AmplitudeAllType{:,nch}]');
-    SummaryAll.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude']};
+    SummaryAll = table(NREM_ID', [NREM_NumberAllType{:,nch}]',[NREM_DurationAllType{:,nch}]',[NREM_FrequencyAllType{:,nch}]',[NREM_AmplitudeAllType{:,nch}]',[NREM_AreaAllType{:,nch}]');
+    SummaryAll.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude'],[chNames '_NREM_Area']};
      % slow spindles
-    SummarySlow = table(NREM_ID', [NREM_NumberSlow{:,nch}]',[NREM_DurationSlow{:,nch}]',[NREM_FrequencySlow{:,nch}]',[NREM_AmplitudeSlow{:,nch}]');
-    SummarySlow.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude']};
+    SummarySlow = table(NREM_ID', [NREM_NumberSlow{:,nch}]',[NREM_DurationSlow{:,nch}]',[NREM_FrequencySlow{:,nch}]',[NREM_AmplitudeSlow{:,nch}]',[NREM_AreaSlow{:,nch}]');
+    SummarySlow.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude'],[chNames '_NREM_Area']};
      % fast spindles
-    SummaryFast = table(NREM_ID', [NREM_NumberFast{:,nch}]',[NREM_DurationFast{:,nch}]',[NREM_FrequencyFast{:,nch}]',[NREM_AmplitudeFast{:,nch}]');
-    SummaryFast.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude']};
+    SummaryFast = table(NREM_ID', [NREM_NumberFast{:,nch}]',[NREM_DurationFast{:,nch}]',[NREM_FrequencyFast{:,nch}]',[NREM_AmplitudeFast{:,nch}]',[NREM_AreaFast{:,nch}]');
+    SummaryFast.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude'],[chNames '_NREM_Area']};
     % write to xlsx
     fprintf('Writing summary tables for channel "%s" during NREM to Excel...\n', chNames)
     writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummaryAll')
@@ -273,12 +285,12 @@ for nch = 1:length(PARAM.channels)
         stageNames(isspace(stageNames)) = []; % delete whitespace
         chNames = char(PARAM.channels(nch));
         chNames(strfind(chNames,'-')) = []; % delete hyphen (re; character not allowed)
-        SummaryAll = table(ID', [NumberAllType{:,nch,nstage}]',[DurationAllType{:,nch,nstage}]',[FrequencyAllType{:,nch,nstage}]',[AmplitudeAllType{:,nch,nstage}]');
-        SummaryAll.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
-        SummarySlow = table(ID', [NumberSlow{:,nch,nstage,1}]',[DurationSlow{:,nch,nstage,1}]',[FrequencySlow{:,nch,nstage,1}]',[AmplitudeSlow{:,nch,nstage,1}]');
-        SummarySlow.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
-        SummaryFast = table(ID', [NumberFast{:,nch,nstage,2}]',[DurationFast{:,nch,nstage,2}]',[FrequencyFast{:,nch,nstage,2}]',[AmplitudeFast{:,nch,nstage,2}]');
-        SummaryFast.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude']};
+        SummaryAll = table(ID', [NumberAllType{:,nch,nstage}]',[DurationAllType{:,nch,nstage}]',[FrequencyAllType{:,nch,nstage}]',[AmplitudeAllType{:,nch,nstage}]',[AreaAllType{:,nch,nstage}]');
+        SummaryAll.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude'],[chNames '_' stageNames '_Area']};
+        SummarySlow = table(ID', [NumberSlow{:,nch,nstage,1}]',[DurationSlow{:,nch,nstage,1}]',[FrequencySlow{:,nch,nstage,1}]',[AmplitudeSlow{:,nch,nstage,1}]',[AreaSlow{:,nch,nstage,1}]');
+        SummarySlow.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude'],[chNames '_' stageNames '_Area']};
+        SummaryFast = table(ID', [NumberFast{:,nch,nstage,2}]',[DurationFast{:,nch,nstage,2}]',[FrequencyFast{:,nch,nstage,2}]',[AmplitudeFast{:,nch,nstage,2}]',[AreaFast{:,nch,nstage,2}]');
+        SummaryFast.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude'],[chNames '_' stageNames '_Area']};
         % write to xlsx
         fprintf('Writing summary tables for channel "%s" during %s to Excel...\n', chNames, stageNames)
         writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryAll')
