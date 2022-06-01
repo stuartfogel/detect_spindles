@@ -32,7 +32,7 @@ badIdx = find(ismember({Event.type},PARAM.badData));
 
 if ~isempty(badIdx)
     for ibad = badIdx % loop on bad data event
-        EEG.data(:,Event(ibad).latency:Event(ibad).latency+Event(ibad).duration-1) = NaN;
+        EEG.data(:,floor(Event(ibad).latency):floor(Event(ibad).latency)+floor(Event(ibad).duration-1)) = NaN;
     end
 else
     warning('No bad data markers in your recording. You should be sure to movement artifact your data before spindle detection.')

@@ -30,7 +30,7 @@ function spindle_calculation_default()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% User defined parameters
-PARAM.minSpDur = 0.249; % minimum spindle duration in sec. Default = 0.49.
+PARAM.minSpDur = 0.49; % minimum spindle duration in sec. Default = 0.49.
 PARAM.type = 13.5; % frequency (Hz) boundary between slow and fast spindles. Default = 13.5.
 PARAM.channels = {'Fz','Cz','Pz'}; % channels to extract spindle info. Default = {'Fz','Cz','Pz'}.
 PARAM.stages = {'N2','N3'}; % channels to extract spindle info. Default = {'N2','N3'}.
@@ -275,9 +275,9 @@ for nch = 1:length(PARAM.channels)
     SummaryFast.Properties.VariableNames = {'ID',[chNames '_NREM_Number'],[chNames '_NREM_Duration'],[chNames '_NREM_Frequency'],[chNames '_NREM_Amplitude'],[chNames '_NREM_Area']};
     % write to xlsx
     fprintf('Writing summary tables for channel "%s" during NREM to Excel...\n', chNames)
-    writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummaryAll')
-    writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummarySlow')
-    writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData' chNames '_NREM.xlsx'],'Sheet','SummaryFast')
+    writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData_' chNames '_NREM.xlsx'],'Sheet','SummaryAll')
+    writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData_' chNames '_NREM.xlsx'],'Sheet','SummarySlow')
+    writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData_' chNames '_NREM.xlsx'],'Sheet','SummaryFast')
     
     for nstage = 1:length(PARAM.stages)
         % create tables
@@ -293,9 +293,9 @@ for nch = 1:length(PARAM.channels)
         SummaryFast.Properties.VariableNames = {'ID',[chNames '_' stageNames '_Number'],[chNames '_' stageNames '_Duration'],[chNames '_' stageNames '_Frequency'],[chNames '_' stageNames '_Amplitude'],[chNames '_' stageNames '_Area']};
         % write to xlsx
         fprintf('Writing summary tables for channel "%s" during %s to Excel...\n', chNames, stageNames)
-        writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryAll')
-        writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummarySlow')
-        writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData' chNames char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryFast')
+        writetable(SummaryAll,[PARAM.resultDir filesep 'SpindleSummaryData_' chNames '_' char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryAll')
+        writetable(SummarySlow,[PARAM.resultDir filesep 'SpindleSummaryData_' chNames '_' char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummarySlow')
+        writetable(SummaryFast,[PARAM.resultDir filesep 'SpindleSummaryData_' chNames '_' char(PARAM.stages(nstage)) '.xlsx'],'Sheet','SummaryFast')
     end
 end
 

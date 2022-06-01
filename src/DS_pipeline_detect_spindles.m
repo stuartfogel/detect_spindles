@@ -79,16 +79,9 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)/60) ' min.']);
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 3: SPINDLE DETECTION');
 
-% delete the previous mrk in the new struct
-EEGs.event = [];
-EEGs.urevent = [];
-EEGs = EEGz;
-
 % detect spindles
-[EEGs] = DS_Threshold(EEGs,PARAM);
-
-% spindle merge events back with existing events and original data:
-EEG = DS_merge_event(EEG,EEGs);
+[EEGs] = DS_Threshold(EEGz,PARAM);
+EEGs = eeg_checkset(EEGs,'eventconsistency');
 
 t3 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t3,t2)/60) ' min.']);
@@ -98,7 +91,7 @@ fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 4: REMOVE SPINDLES OUTSIDE NREM');
 
 if ~isempty(PARAM.goodsleepstages)
-    EEG = DS_remBadSleepStage(EEG, PARAM);
+    EEGb = DS_remBadSleepStage(EEGs, PARAM);
     t4 = clock;
 else
     t4 = clock;
@@ -111,7 +104,7 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t4,t3)/60) ' min.']);
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 5: REMOVE SPINDLES DURING MOVEMENT ARTIFACT');
 
-EEG = DS_remBadMinMax(EEG, PARAM);
+EEGm = DS_remBadMinMax(EEGb, PARAM);
 
 t5 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)/60) ' min.']);
@@ -119,6 +112,9 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)/60) ' min.']);
 %% 6) SPINDLE CHARACTERIZATION
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 6: SPINDLE CHARACTERIZATION');
+
+% replace original EEG dataset events with final events structure
+EEG.event = EEGm.event;
 
 EEG = DS_characSpindles(EEG, PARAM);
 

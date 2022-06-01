@@ -28,25 +28,46 @@ function [ZS, markers] = DS_Threshold(ZS,PARAM)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 DATA = ZS.data;
+channels = ZS.chanlocs;
 ZSDelay = round(PARAM.ZSDelay * ZS.srate);
 
 % check the dimension : must be (ch x times)
 if size(DATA,2)<size(DATA,1)
     DATA = DATA';
 end
-
 [nbCh, nbPts] = size(DATA);
 
-markers = struct('type',{}, ...
-    'latency',{}, ...
-    'channel',{}, ...
-    'duration',{}, ...
-    'peak',{}, ...
-    'amplitude',{}, ...
-    'area',{}, ...
-    'frequency',{}, ...
-    'urevent',{} ...
-    );
+% create marker structure based on original
+markers = ZS.event;
+
+% add necessary spindle events fields to original structure
+if ~isfield(markers,'type')
+    for nEvt=1:length(markers); markers(nEvt).type = []; end
+end
+if ~isfield(markers,'latency')
+    for nEvt=1:length(markers); markers(nEvt).latency = []; end
+end
+if ~isfield(markers,'channel')
+    for nEvt=1:length(markers); markers(nEvt).channel = []; end
+end
+if ~isfield(markers,'duration')
+    for nEvt=1:length(markers); markers(nEvt).duration = []; end
+end
+if ~isfield(markers,'peak')
+    for nEvt=1:length(markers); markers(nEvt).peak = []; end
+end
+if ~isfield(markers,'amplitude')
+    for nEvt=1:length(markers); markers(nEvt).amplitude = []; end
+end
+if ~isfield(markers,'area')
+    for nEvt=1:length(markers); markers(nEvt).area = []; end
+end
+if ~isfield(markers,'frequency')
+    for nEvt=1:length(markers); markers(nEvt).frequency = []; end
+end
+if ~isfield(markers,'urevent')
+    for nEvt=1:length(markers); markers(nEvt).urevent = []; end
+end
 
 % for iCh = 1:nbCh
 for iCh = 1:nbCh
@@ -75,16 +96,20 @@ for iCh = 1:nbCh
             
             [max_ampli, peak_time] = max(DATA(iCh,new_detection:end_time));
             peak_time = peak_time +new_detection-1;
-            newMrks = struct('type',PARAM.eventName,...
-                'latency',begin_time, ...
-                'channel',iCh, ...
-                'duration', end_time - begin_time, ...
-                'peak',peak_time, ...
-                'amplitude',[], ...
-                'area',[], ...
-                'frequency',[], ...
-                'urevent',[] ...
-                );
+            
+            % create marker structure with updated fields
+            newMrks = markers([]);
+            
+            % populate event information
+            newMrks(1).type = PARAM.eventName{:};
+            newMrks(1).latency = begin_time;
+            newMrks(1).channel = channels(iCh).labels;
+            newMrks(1).duration = end_time - begin_time;
+            newMrks(1).peak = peak_time;
+            newMrks(1).amplitude = [];
+            newMrks(1).area = [];
+            newMrks(1).frequency = [];
+            newMrks(1).urevent = [];
             
             % Apply minimum spindle duration criteria, if specified in PARAM.minDur
             if ~isempty(PARAM.minDur)

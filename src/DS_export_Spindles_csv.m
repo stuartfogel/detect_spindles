@@ -29,7 +29,6 @@ function DS_export_Spindles_csv(EEG,PARAM)
 
 Mrk = EEG.event;
 nbMrk = length(Mrk);
-ChannelName = {EEG.chanlocs.labels};
 
 for i = 1:nbMrk
     Mrk(i).latency = Mrk(i).latency/EEG.srate; % convert to seconds
@@ -45,7 +44,7 @@ for i = 1:nbMrk
         elseif isempty(Mrk(i).channel) % some events have empty channels '' instead of []
             Mrk(i).channel = [];
         else
-            Mrk(i).channel = ChannelName{Mrk(i).channel};
+            Mrk(i).channel = Mrk(i).channel;
         end
     else
         Mrk(i).channel = 'none';
