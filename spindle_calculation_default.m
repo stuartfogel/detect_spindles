@@ -101,11 +101,12 @@ for nfile = 1:length(PARAM.filename)
         end
     end
     % put all that good stuff back into "data"
-    clear data
-    data = perTypeData;
+    clear tables cleanidx data perChannelidx perChanData perStageidx slowidx fastidx nch nstage
 end
 
-clear cleanidx perChannelidx perStageidx slowidx fastidx nfile nch nstage
+data = perTypeData;
+
+clear nfile perTypeData
 
 warning( 'off', 'MATLAB:xlswrite:AddSheet' );
 
@@ -127,18 +128,18 @@ for nch = 1:length(PARAM.channels)
             fprintf('Exporting "%s" spindle data during NREM - #%.2i of %.2i...\n', PARAM.channels{nch}, nfile, length(PARAM.filename))
              % export all spindle info to Excel
             writetable(vertcat(perStageData{nfile,nch,:}), allTypeFilename, 'Sheet', sheetname)
-            writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
+            % writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
              % export slow spindle info
             writetable(vertcat(data{nfile,nch,:,1}),slowfilename,'Sheet',sheetname)
-            writetable(struct2table(PARAM),slowfilename,'Sheet',1)
+            % writetable(struct2table(PARAM),slowfilename,'Sheet',1)
              % export fast spindle info
             writetable(vertcat(data{nfile,nch,:,2}),fastfilename,'Sheet',sheetname)
-            writetable(struct2table(PARAM),fastfilename,'Sheet',1)
+            % writetable(struct2table(PARAM),fastfilename,'Sheet',1)
         end
     end
     clear allTypeFilename slowfilename fastfilename sheetname
     
-     % NREM stages separately
+    % NREM stages separately
     for nstage = 1:length(PARAM.stages)
         allTypeFilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '.xlsx']; % all spindle type
         slowfilename = [PARAM.resultDir filesep char(PARAM.channels(nch)) '_' char(PARAM.stages(nstage)) '_slow.xlsx']; % slow spindles
@@ -154,11 +155,11 @@ for nch = 1:length(PARAM.channels)
             else
                 fprintf('Exporting "%s" spindle data during %s - #%.2i of %.2i...\n', PARAM.channels{nch}, PARAM.stages{nstage}, nfile, length(PARAM.filename))
                 writetable(perStageData{nfile,nch,nstage},allTypeFilename,'Sheet',sheetname)
-                writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
+                % writetable(struct2table(PARAM),allTypeFilename,'Sheet',1)
                 writetable(data{nfile,nch,nstage,1},slowfilename,'Sheet',sheetname)
-                writetable(struct2table(PARAM),slowfilename,'Sheet',1)
+                % writetable(struct2table(PARAM),slowfilename,'Sheet',1)
                 writetable(data{nfile,nch,nstage,2},fastfilename,'Sheet',sheetname)
-                writetable(struct2table(PARAM),fastfilename,'Sheet',1)
+                % writetable(struct2table(PARAM),fastfilename,'Sheet',1)
             end
         end
     end
