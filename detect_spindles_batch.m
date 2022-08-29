@@ -42,7 +42,7 @@ PARAM = struct(...
     ,'ZSResetThreshold', 0.1 ... Value for the reset. Default: [0.1-0.25].
     ,'ZSBeginThreshold', 0.1 ... Value to detect the begining of spindles. Default: [0.1-0.25].
     ,'ZSDelay', 0.25 ... minimum delay btw 2 spindles on the same channel (sec.). Default: [0.25].
-    ,'minDur', 0.49 ... minimum spindle duration. Default: [0.49] (in order to include 0.5 sec spindles).
+    ,'minDur', [0.49,3.01] ... minimum spindle duration. Default: [0.49 3.01].
     ,'eventName', {{'Spindle'}} ... name of event. Default: {{'Spindle'}}.
     ,'allsleepstages', {{'N1','N2','N3','R','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','R','W','unscored'}}.
     ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.

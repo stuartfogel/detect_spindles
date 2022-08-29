@@ -30,10 +30,9 @@ function spindle_calculation_default()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% User defined parameters
-PARAM.minSpDur = 0.49; % minimum spindle duration in sec. Default = 0.49.
 PARAM.type = 13.5; % frequency (Hz) boundary between slow and fast spindles. Default = 13.5.
 PARAM.channels = {'Fz','Cz','Pz'}; % channels to extract spindle info. Default = {'Fz','Cz','Pz'}.
-PARAM.stages = {'N2','N3'}; % channels to extract spindle info. Default = {'N2','N3'}.
+PARAM.stages = {'NREM2','NREM3'}; % channels to extract spindle info. Default = {'N2','N3'}.
 
 %% Specify filename(s)
 % you can manually specify filenames here, or leave empty for pop-up
@@ -79,10 +78,7 @@ clear filename pathname resultDir
 
 for nfile = 1:length(PARAM.filename)
     % read in raw data to table format
-    tables{nfile} = readtable([char(PARAM.pathname) char(PARAM.filename(nfile))]);
-    % take only spindles > minSpDur
-    cleanidx = tables{nfile}.duration >= PARAM.minSpDur;
-    data{nfile} = tables{nfile}(cleanidx,:);
+    data{nfile} = readtable([char(PARAM.pathname) char(PARAM.filename(nfile))]);
     % take only spindles from specified channel
     for nch = 1:length(PARAM.channels)
         perChannelidx = strcmp(PARAM.channels(nch),data{nfile}.channel);
