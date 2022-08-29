@@ -113,7 +113,7 @@ for iCh = 1:nbCh
             
             % Apply minimum spindle duration criteria, if specified in PARAM.minDur
             if ~isempty(PARAM.minDur)
-                if newMrks.duration > PARAM.minDur*ZS.srate
+                if newMrks.duration > PARAM.minDur(1)*ZS.srate && newMrks.duration < PARAM.minDur(2)*ZS.srate
                     markers = [markers newMrks];
                 end
             else
