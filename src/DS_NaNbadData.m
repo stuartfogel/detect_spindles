@@ -29,10 +29,11 @@ function EEG = DS_NaNbadData(EEG,PARAM)
 
 Event = EEG.event;
 badIdx = find(ismember({Event.type},PARAM.badData));
+badIdx = int32(floor(badIdx)); % convert to integer to avoid unnecessary matlab warning
 
 if ~isempty(badIdx)
     for ibad = badIdx % loop on bad data event
-        EEG.data(:,floor(Event(ibad).latency):floor(Event(ibad).latency)+floor(Event(ibad).duration-1)) = NaN;
+        EEG.data(:,int32(floor(Event(ibad).latency)):int32(floor(Event(ibad).latency+Event(ibad).duration-1))) = NaN; % convert to integer to avoid unnecessary matlab warning
     end
 else
     warning('No bad data markers in your recording. You should be sure to movement artifact your data before spindle detection.')
