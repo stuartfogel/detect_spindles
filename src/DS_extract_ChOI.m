@@ -29,24 +29,8 @@ function EEG = DS_extract_ChOI(EEG,PARAM)
 
 if isfield(PARAM,'channels_of_interest')
     if ~isempty(PARAM.channels_of_interest)
-        
-        ChName = {EEG.chanlocs.labels};
-        if iscell(PARAM.channels_of_interest)
-            ChOI = PARAM.channels_of_interest;
-        else
-            ChOI = {PARAM.channels_of_interest};
-        end
-        
-        iChOI = false(size(ChName));
-        for i = 1:length(ChOI)
-            iChOI = logical(iChOI + strcmp(ChName,ChOI{i}));
-        end
-        
-        EEG.data = EEG.data(iChOI,:);
-        EEG.chanlocs = EEG.chanlocs(iChOI);
-        EEG.nbchan = length(ChOI);
-        
+        EEG = pop_select(EEG,'channel',PARAM.channels_of_interest);
+        EEG = eeg_checkset(EEG);
     end
 end
-
 end

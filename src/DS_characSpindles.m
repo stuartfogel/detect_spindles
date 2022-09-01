@@ -34,18 +34,8 @@ end
 indlogicalSpindles = strcmpi({EEG.event.type},PARAM.eventName);
 indSpindle = find(indlogicalSpindles);
 
-% if ~isfield(EEG.event,'channel')
-%     prompt = 'Channel info missing. Enter channel index (e.g., 1) ';
-%     channel = input(prompt);
-% end
-
 for iSpin = indSpindle
     Spindle  = EEG.event(iSpin);
-%     if ~isfield(Spindle,'channel')
-%         if strcmpi(Spindle.type,PARAM.eventName)
-%             Spindle.channel = channel;
-%         end
-%     end
     sp_beg = Spindle.latency;
     sp_end = Spindle.duration + sp_beg;
     data = EEG.data(find(ismember({EEG.chanlocs.labels},Spindle.channel)),sp_beg:sp_end);

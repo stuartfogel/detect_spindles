@@ -92,6 +92,7 @@ fprintf(1,'%s\n','STEP 4: REMOVE SPINDLES OUTSIDE NREM');
 
 if ~isempty(PARAM.goodsleepstages)
     EEGb = DS_remBadSleepStage(EEGs, PARAM);
+    EEGb = eeg_checkset(EEGb,'eventconsistency');
     t4 = clock;
 else
     t4 = clock;
@@ -105,6 +106,7 @@ fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 5: REMOVE SPINDLES DURING MOVEMENT ARTIFACT');
 
 EEGm = DS_remBadMinMax(EEGb, PARAM);
+EEGm = eeg_checkset(EEGm,'eventconsistency');
 
 t5 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)/60) ' min.']);
@@ -117,6 +119,7 @@ fprintf(1,'%s\n','STEP 6: SPINDLE CHARACTERIZATION');
 EEG.event = EEGm.event;
 
 EEG = DS_characSpindles(EEG, PARAM);
+EEG = eeg_checkset(EEG, 'checkur');
 
 t6 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t6,t5)/60) ' min.']);

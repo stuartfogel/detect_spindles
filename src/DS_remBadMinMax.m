@@ -29,9 +29,6 @@ function EEG = DS_remBadMinMax(EEG,PARAM)
 
 Event = EEG.event;
 
-% to be sure that all is in the right order
-[~, idx] = sort([Event.latency]);
-Event = Event(idx);
 SpindleIdx = find(ismember({Event.type},PARAM.eventName));
 ToRmv = [];
 

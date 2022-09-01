@@ -29,19 +29,8 @@ function EEG = DS_remBadSleepStage(EEG, PARAM)
 
 Event = EEG.event;
 
-if nargin<2
-    PARAM = [];
-end
-
 mrkScoring = PARAM.allsleepstages;
 mrkSelectedScoring = PARAM.goodsleepstages;
-
-% to be sure that all is in the right order
-[~, idx] = sort([Event.latency]);
-Event = Event(idx);
-for i = 1:length(Event)
-    Event(i).SleepStage = ''; % initialization
-end
 
 SpindleIdx = find(ismember({Event.type},PARAM.eventName));
 

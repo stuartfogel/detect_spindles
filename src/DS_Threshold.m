@@ -41,32 +41,35 @@ end
 markers = ZS.event;
 
 % add necessary spindle events fields to original structure
-if ~isfield(markers,'type')
+if ~isfield(markers,'type') % default for EEGlab
     for nEvt=1:length(markers); markers(nEvt).type = []; end
 end
-if ~isfield(markers,'latency')
+if ~isfield(markers,'latency') % default for EEGlab
     for nEvt=1:length(markers); markers(nEvt).latency = []; end
 end
-if ~isfield(markers,'channel')
-    for nEvt=1:length(markers); markers(nEvt).channel = []; end
-end
-if ~isfield(markers,'duration')
+if ~isfield(markers,'duration') % default for EEGlab
     for nEvt=1:length(markers); markers(nEvt).duration = []; end
 end
-if ~isfield(markers,'peak')
+if ~isfield(markers,'urevent') % default for EEGlab
+    for nEvt=1:length(markers); markers(nEvt).urevent = []; end
+end
+if ~isfield(markers,'channel') % optional for EEGlab
+    for nEvt=1:length(markers); markers(nEvt).channel = []; end
+end
+if ~isfield(markers,'peak') % specific to detect_spindles
     for nEvt=1:length(markers); markers(nEvt).peak = []; end
 end
-if ~isfield(markers,'amplitude')
+if ~isfield(markers,'amplitude') % specific to detect_spindles
     for nEvt=1:length(markers); markers(nEvt).amplitude = []; end
 end
-if ~isfield(markers,'area')
+if ~isfield(markers,'area') % specific to detect_spindles
     for nEvt=1:length(markers); markers(nEvt).area = []; end
 end
-if ~isfield(markers,'frequency')
+if ~isfield(markers,'frequency') % specific to detect_spindles
     for nEvt=1:length(markers); markers(nEvt).frequency = []; end
 end
-if ~isfield(markers,'urevent')
-    for nEvt=1:length(markers); markers(nEvt).urevent = []; end
+if ~isfield(markers,'SleepStage') % specific to detect_spindles
+    for nEvt=1:length(markers); markers(nEvt).SleepStage = []; end
 end
 
 % for iCh = 1:nbCh

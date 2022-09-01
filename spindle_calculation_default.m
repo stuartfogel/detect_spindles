@@ -32,7 +32,7 @@ function spindle_calculation_default()
 %% User defined parameters
 PARAM.type = 13.5; % frequency (Hz) boundary between slow and fast spindles. Default = 13.5.
 PARAM.channels = {'Fz','Cz','Pz'}; % channels to extract spindle info. Default = {'Fz','Cz','Pz'}.
-PARAM.stages = {'NREM2','NREM3'}; % channels to extract spindle info. Default = {'N2','N3'}.
+PARAM.stages = {'N2','N3'}; % channels to extract spindle info. Default = {'N2','N3'}.
 
 %% Specify filename(s)
 % you can manually specify filenames here, or leave empty for pop-up

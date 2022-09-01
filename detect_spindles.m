@@ -71,8 +71,8 @@ if length(EEG)>1 % batch mode
     end
 else
     EEG.setname = [EEG.setname '_' PARAM.suffix]; % update setname
-    [EEG] = DS_pipeline_detect_spindles(EEG,PARAM);
-    eeg_checkset(EEG);
+    EEG = DS_pipeline_detect_spindles(EEG,PARAM);
+    EEG = eeg_checkset(EEG);
     fprintf(1,'%s\n',['Saving file ' EEG.setname '.set']);
 end
 
