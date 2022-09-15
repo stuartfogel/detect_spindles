@@ -41,35 +41,32 @@ end
 markers = ZS.event;
 
 % add necessary spindle events fields to original structure
-if ~isfield(markers,'type') % default for EEGlab
+if ~isfield(markers,'type')
     for nEvt=1:length(markers); markers(nEvt).type = []; end
 end
-if ~isfield(markers,'latency') % default for EEGlab
+if ~isfield(markers,'latency')
     for nEvt=1:length(markers); markers(nEvt).latency = []; end
 end
-if ~isfield(markers,'duration') % default for EEGlab
-    for nEvt=1:length(markers); markers(nEvt).duration = []; end
-end
-if ~isfield(markers,'urevent') % default for EEGlab
-    for nEvt=1:length(markers); markers(nEvt).urevent = []; end
-end
-if ~isfield(markers,'channel') % optional for EEGlab
+if ~isfield(markers,'channel')
     for nEvt=1:length(markers); markers(nEvt).channel = []; end
 end
-if ~isfield(markers,'peak') % specific to detect_spindles
+if ~isfield(markers,'duration')
+    for nEvt=1:length(markers); markers(nEvt).duration = []; end
+end
+if ~isfield(markers,'peak')
     for nEvt=1:length(markers); markers(nEvt).peak = []; end
 end
-if ~isfield(markers,'amplitude') % specific to detect_spindles
+if ~isfield(markers,'amplitude')
     for nEvt=1:length(markers); markers(nEvt).amplitude = []; end
 end
-if ~isfield(markers,'area') % specific to detect_spindles
+if ~isfield(markers,'area')
     for nEvt=1:length(markers); markers(nEvt).area = []; end
 end
-if ~isfield(markers,'frequency') % specific to detect_spindles
+if ~isfield(markers,'frequency')
     for nEvt=1:length(markers); markers(nEvt).frequency = []; end
 end
-if ~isfield(markers,'SleepStage') % specific to detect_spindles
-    for nEvt=1:length(markers); markers(nEvt).SleepStage = []; end
+if ~isfield(markers,'urevent')
+    for nEvt=1:length(markers); markers(nEvt).urevent = []; end
 end
 
 % for iCh = 1:nbCh
@@ -104,7 +101,7 @@ for iCh = 1:nbCh
             newMrks = markers([]);
             
             % populate event information
-            newMrks(1).type = PARAM.eventName{:};
+            newMrks(1).type = PARAM.eventName;
             newMrks(1).latency = begin_time;
             newMrks(1).channel = channels(iCh).labels;
             newMrks(1).duration = end_time - begin_time;
@@ -116,7 +113,7 @@ for iCh = 1:nbCh
             
             % Apply minimum spindle duration criteria, if specified in PARAM.minDur
             if ~isempty(PARAM.minDur)
-                if newMrks.duration > PARAM.minDur(1)*ZS.srate && newMrks.duration < PARAM.minDur(2)*ZS.srate
+                if newMrks.duration > PARAM.minDur*ZS.srate && newMrks.duration < PARAM.maxDur*ZS.srate
                     markers = [markers newMrks];
                 end
             else
