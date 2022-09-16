@@ -29,6 +29,12 @@ function EEG = DS_remBadSleepStage(EEG, PARAM)
 
 Event = EEG.event;
 
+% preallocate new field
+for nEvt = 1:length(Event)
+    Event(nEvt).SleepStage = '';
+end
+clear nEvt
+
 mrkScoring = PARAM.allsleepstages;
 mrkSelectedScoring = PARAM.goodsleepstages;
 
