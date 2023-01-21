@@ -26,7 +26,7 @@ function ZS = DS_Zscore_new(CD,PARAM)
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
 %
 % This file is part of 'detect_spindles'.
-% See https://github.com/stuartfogel/detect_REMS for details.
+% See https://github.com/stuartfogel/detect_spindles for details.
 %
 
 % Copyright (C) Stuart Fogel & Sleep Well, 2022.

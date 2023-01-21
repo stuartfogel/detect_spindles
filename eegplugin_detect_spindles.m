@@ -23,7 +23,7 @@ function vers = eegplugin_detect_spindles(fig, trystrs, catchstrs)
 %   University of Ottawa
 %
 % This file is part of 'detect_spindles'.
-% See https://github.com/stuartfogel/detect_REMS for details.
+% See https://github.com/stuartfogel/detect_spindles for details.
 %
 
 % Copyright (C) Stuart Fogel & Sleep Well, 2022.
