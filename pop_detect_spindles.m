@@ -181,7 +181,6 @@ if ~isempty(result)
         EEG.setname = [EEG.setname '_' PARAM.suffix]; % update setname
         EEG = detect_spindles(EEG,PARAM);
         EEG = eeg_checkset(EEG);
-        fprintf(1,'%s\n',['Saving file ' EEG.setname '.set']);
     end
 else
     com = '';
