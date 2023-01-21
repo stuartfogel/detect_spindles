@@ -17,44 +17,60 @@ function [ALLEEG] = detect_spindles_batch()
 %
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
 %
+% This file is part of 'detect_spindles'.
+% See https://github.com/stuartfogel/detect_REMS for details.
+%
+
+% Copyright (C) Stuart Fogel & Sleep Well, 2022.
+% https://socialsciences.uottawa.ca/sleep-lab/
+% https://www.sleepwellpsg.com
+%
+% See the GNU General Public License v3.0 for more information.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+% 1. Redistributions of source code must retain the above author, license,
+% copyright notice, this list of conditions, and the following disclaimer.
+%
+% 2. Redistributions in binary form must reproduce the above author, license,
+% copyright notice, this list of conditions, and the following disclaimer in
+% the documentation and/or other materials provided with the distribution.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+% THE POSSIBILITY OF SUCH DAMAGE.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% LOAD EEGLAB
-if isempty(which('eeglab'))
-    eeglab;
-    close(gcf);
+if ~isempty(which('eeglab'))
+    eeglab nogui
     clear
+else
+    try
+        dirName = dirNames(startsWith({dirNames([dirNames.isdir]).name}, 'eeglab20')).folder;
+        folderName = dirNames(startsWith({dirNames([dirNames.isdir]).name}, 'eeglab20')).name;
+        if isempty('dirName')
+            errordlg('Please add EEGLAB main folder to Matlab path.','EEGLAB not found')
+            return
+        end
+        addpath([dirName filesep folderName]);
+    catch
+        errordlg('Please add EEGLAB main folder to Matlab path.','EEGLAB not found')
+        return
+    end
 end
 
-%% CUSTOM PARAMETERS
-
-PARAM = struct(...
-    'cdemodORrms',1 ... use complex demodulation [1], or root mean square [0] to extract frequency of interest. Default: [1].
-    ,'PB_forder',1 ... order for the first low pass filter. Default [1].
-    ,'cdemod_freq', 13.5 ...    central frequency (i.e. Carrier frequency in Hz) for the complex demodulation. Default: [13.5].
-    ,'cdemod_filter_lowpass', 5 ... bandwidth about central frequency in CD. Default: [5].
-    ,'cdemod_forder', 4 ...    filter order for the complex demodulation. Default: [4].
-    ,'rmshp', 11 ... high pass filter if using rms. Default: [11].
-    ,'rmslp', 16 ... low pass filter if using rms. Default: [16].
-    ,'channels_of_interest',{{'Fz','Cz','Pz'}} ... selected channels. Default: {{'Fz','Cz','Pz'}}
-    ,'ZSwindowlength', 60 ... window for ZSCORE (in seconds). Default: [60].
-    ,'ZSThreshold', 2.33 ... Threshold for the ZScore. Default: [2.33].
-    ,'ZSResetThreshold', 0.1 ... Value for the reset. Default: [0.1-0.25].
-    ,'ZSBeginThreshold', 0.1 ... Value to detect the begining of spindles. Default: [0.1-0.25].
-    ,'ZSDelay', 0.25 ... minimum delay btw 2 spindles on the same channel (sec.). Default: [0.25].
-    ,'minDur', 0.49 ... minimum spindle duration. Default: [0.49].
-    ,'maxDur', 3.01 ... maximum spindle duration. Default: [3.01].
-    ,'eventName', 'Spindle' ... name of event. Default: 'Spindle'.
-    ,'allsleepstages', {{'N1','N2','N3','R','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','R','W','unscored'}}.
-    ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.
-    ,'badData', {{'Movement'}} ... name for movement artifact. Default: {{'Movement'}}.
-    ,'save_result_file', 1 ... file type to save markers to a file. If empty [], none.
-    ,'suffix', {'SpDet'} ... file suffix for output dataset. Default: {'SpDet'}.
-    ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
-    );
-
 %% SPECIFY FILENAMES (OPTIONAL)
-
 % you can manually specify filenames here, or leave empty for pop-up
 pathname = '';
 filename = {'',...
@@ -62,15 +78,13 @@ filename = {'',...
     };
 
 %% MANUALLY SELECT *.SET FILES
-
 if isempty(pathname)
-    [filename, pathname] = uigetfile2( ...
+    [filename, pathname] = uigetfile( ...
         {'*.set','EEGlab Dataset (*.set)'; ...
         '*.mat','MAT-files (*.mat)'; ...
         '*.*',  'All Files (*.*)'}, ...
         'multiselect', 'on');
 end
-
 % check the filename(s)
 if isequal(filename,0) || isequal(pathname,0) % no files were selected
     disp('User selected Cancel')
@@ -86,7 +100,6 @@ for nfile = 1:length(filename)
     EEG = pop_loadset('filename',filename{1,nfile},'filepath',pathname);
     ALLEEG(nfile) = EEG;
 end
-
-ALLEEG = detect_spindles(ALLEEG,PARAM);
+ALLEEG = pop_detect_spindles(ALLEEG);
 
 end

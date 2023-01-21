@@ -28,53 +28,146 @@ function [EEG] = detect_spindles(EEG,PARAM)
 %
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
 %
+% This file is part of 'detect_spindles'.
+% See https://github.com/stuartfogel/detect_REMS for details.
+%
+
+% Copyright (C) Stuart Fogel & Sleep Well, 2022.
+% https://socialsciences.uottawa.ca/sleep-lab/
+% https://www.sleepwellpsg.com
+%
+% See the GNU General Public License v3.0 for more information.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+% 1. Redistributions of source code must retain the above author, license,
+% copyright notice, this list of conditions, and the following disclaimer.
+%
+% 2. Redistributions in binary form must reproduce the above author, license,
+% copyright notice, this list of conditions, and the following disclaimer in
+% the documentation and/or other materials provided with the distribution.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+% THE POSSIBILITY OF SUCH DAMAGE.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% INPUT ARGUMENTS
-if nargin < 1; EEG = []; end
-if nargin < 2; PARAM.emptyparam = 1; end
+%% 0) Start pipeline
+addpath('src')
+t0 = clock; % start time
+fprintf(1,'%s\n',['------------------------ ' datestr(t0) ' ------------------------']);
+fprintf(1,'%s\n',['Processing file ' EEG.setname]);
+% Check data format for compatibility. Ensure EEG.data are double (filtfilt requirement). This also resolves other related issues.
+EEG.data = double(EEG.data);
 
-%% CUSTOM PARAMETERS
-if PARAM.emptyparam == 1
-    PARAM = struct(...
-    'cdemodORrms',1 ... use complex demodulation [1], or root mean square [0] to extract frequency of interest. Default: [1].
-    ,'PB_forder',1 ... order for the first low pass filter. Default [1].
-    ,'cdemod_freq', 13.5 ...    central frequency (i.e. Carrier frequency in Hz) for the complex demodulation. Default: [13.5].
-    ,'cdemod_filter_lowpass', 5 ... bandwidth about central frequency in CD. Default: [5].
-    ,'cdemod_forder', 4 ...    filter order for the complex demodulation. Default: [4].
-    ,'rmshp', 11 ... high pass filter if using rms. Default: [11].
-    ,'rmslp', 16 ... low pass filter if using rms. Default: [16].
-    ,'channels_of_interest',{{'Fz','Cz','Pz'}} ... selected channels. Default: {{'Fz','Cz','Pz'}}
-    ,'ZSwindowlength', 60 ... window for ZSCORE (in seconds). Default: [60].
-    ,'ZSThreshold', 2.33 ... Threshold for the ZScore. Default: [2.33].
-    ,'ZSResetThreshold', 0.1 ... Value for the reset. Default: [0.1-0.25].
-    ,'ZSBeginThreshold', 0.1 ... Value to detect the begining of spindles. Default: [0.1-0.25].
-    ,'ZSDelay', 0.25 ... minimum delay btw 2 spindles on the same channel (sec.). Default: [0.25].
-    ,'minDur', 0.49 ... minimum spindle duration. Default: [0.49].
-    ,'maxDur', 3.01 ... maximum spindle duration. Default: [3.01].
-    ,'eventName', 'Spindle' ... name of event. Default: 'Spindle'.
-    ,'allsleepstages', {{'N1','N2','N3','R','W','unscored'}} ... name of all sleep stage markers. Default: {{'N1','N2','N3','R','W','unscored'}}.
-    ,'goodsleepstages', {{'N2','N3'}} ... name of sleep stage markers to keep spindle events. Default: {{'N2','N3'}}.
-    ,'badData', {{'Movement'}} ... name for movement artifact. Default: {{'Movement'}}.
-    ,'save_result_file', 1 ... file type to save markers to a file. If empty [], none.
-    ,'suffix', {'SpDet'} ... file suffix for output dataset. Default: {'SpDet'}.
-    ,'emptyparam', 0 ... set PARAM.emptyparam to not empty.
-    );
+%% 1) COMPLEX DEMODULATION OR RMS
+
+% 1a) channels of interest
+if ~isempty(PARAM.channels_of_interest)
+    EEGcoi = DS_extract_ChOI(EEG,PARAM);
 end
 
-%% RUN PIPELINE
-if length(EEG)>1 % batch mode
-    for iSet = 1:length(EEG)
-        EEG(iSet).setname = [EEG(iSet).setname '_' PARAM.suffix]; % update setname
-        [EEG(iSet)] = DS_pipeline_detect_spindles(EEG(iSet),PARAM);
-        fprintf(1,'%s\n',['Saving file ' EEG(iSet).setname '.set']);
-        EEG(iSet) = pop_saveset(EEG(iSet),'filepath',EEG(iSet).filepath,'filename',EEG(iSet).setname,'savemode','onefile');
-    end
+% 1b) if complex demodulation is your preference
+if PARAM.cdemodORrms == 1
+    fprintf(1,'%s\n',' ');
+    fprintf(1,'%s\n','STEP 1: COMPLEX DEMODULATION');
+    EEGfreq = DS_complexDemodulation(EEGcoi,PARAM);
+    % 1c) if RMS is your weapon of choice
+elseif PARAM.cdemodORrms == 0
+    fprintf(1,'%s\n',' ');
+    fprintf(1,'%s\n','STEP 1: ROOT MEAN SQUARE TRANSFORMATION');
+    EEGfreq = DS_rms(EEGcoi,PARAM);
 else
-    EEG.setname = [EEG.setname '_' PARAM.suffix]; % update setname
-    EEG = DS_pipeline_detect_spindles(EEG,PARAM);
-    EEG = eeg_checkset(EEG);
-    fprintf(1,'%s\n',['Saving file ' EEG.setname '.set']);
+    error('Please choose either complex demodulate or RMS to extract frequencies of interest.')
 end
+
+t1 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t1,t0)) ' sec.']);
+
+%% 2) Z-SCORE NORMALIZATION
+
+fprintf(1,'%s\n',' ');
+fprintf(1,'%s\n','STEP 2: Z-SCORE NORMALIZATION');
+
+% 2a) set data during movements to NaN so they don't contaminate normalization
+EEGnan = DS_NaNbadData(EEGfreq,PARAM);
+
+% 2b) Signal normalization
+EEGz = DS_Zscore_new(EEGnan,PARAM);
+
+t2 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)/60) ' min.']);
+
+%% 3) SPINDLE DETECTION
+fprintf(1,'%s\n',' ');
+fprintf(1,'%s\n','STEP 3: SPINDLE DETECTION');
+
+% detect spindles
+[EEGs] = DS_Threshold(EEGz,PARAM);
+EEGs = eeg_checkset(EEGs,'eventconsistency');
+
+t3 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t3,t2)/60) ' min.']);
+
+%% 4) REMOVE SPINDLES OUTSIDE NREM
+fprintf(1,'%s\n',' ');
+fprintf(1,'%s\n','STEP 4: REMOVE SPINDLES OUTSIDE NREM');
+
+if ~isempty(PARAM.goodsleepstages)
+    EEGb = DS_remBadSleepStage(EEGs, PARAM);
+    EEGb = eeg_checkset(EEGb,'eventconsistency');
+    t4 = clock;
+else
+    t4 = clock;
+    disp('Removed spindles from outside NREM skipped')
+end
+
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t4,t3)/60) ' min.']);
+
+%% 5) REMOVE SPINDLES DURING MOVEMENT ARTIFACT
+fprintf(1,'%s\n',' ');
+fprintf(1,'%s\n','STEP 5: REMOVE SPINDLES DURING MOVEMENT ARTIFACT');
+
+EEGm = DS_remBadMinMax(EEGb, PARAM);
+EEGm = eeg_checkset(EEGm,'eventconsistency');
+
+t5 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)/60) ' min.']);
+
+%% 6) SPINDLE CHARACTERIZATION
+fprintf(1,'%s\n',' ');
+fprintf(1,'%s\n','STEP 6: SPINDLE CHARACTERIZATION');
+
+% replace original EEG dataset events with final events structure
+EEG.event = EEGm.event;
+
+EEG = DS_characSpindles(EEG, PARAM);
+EEG = eeg_checkset(EEG, 'checkur');
+
+t6 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t6,t5)/60) ' min.']);
+
+%% 7) EXPORT SPINDLE MARKERS
+fprintf(1,'%s\n',' ');
+fprintf(1,'%s\n','STEP 7: EXPORT SPINDLE MARKERS');
+
+if isfield(PARAM,'save_result_file')
+    if ~isempty(PARAM.save_result_file)
+        DS_export_Spindles_csv(EEG,PARAM);
+    end
+end
+
+t7 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t7,t6)/60) ' min.']);
 
 end
