@@ -25,6 +25,38 @@ function [ZS, markers] = DS_Threshold(ZS,PARAM)
 %
 %           journal.frontiersin.org/article/10.3389/fnhum.2015.00507/full
 %
+% This file is part of 'detect_spindles'.
+% See https://github.com/stuartfogel/detect_REMS for details.
+%
+
+% Copyright (C) Stuart Fogel & Sleep Well, 2022.
+% https://socialsciences.uottawa.ca/sleep-lab/
+% https://www.sleepwellpsg.com
+%
+% See the GNU General Public License v3.0 for more information.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+% 1. Redistributions of source code must retain the above author, license,
+% copyright notice, this list of conditions, and the following disclaimer.
+%
+% 2. Redistributions in binary form must reproduce the above author, license,
+% copyright notice, this list of conditions, and the following disclaimer in
+% the documentation and/or other materials provided with the distribution.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+% THE POSSIBILITY OF SUCH DAMAGE.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 DATA = ZS.data;
@@ -73,33 +105,26 @@ end
 for iCh = 1:nbCh
     t = 1;
     CONTINUE = 1;
-    
     while CONTINUE
         % loop over time
         t;
         new_detection = find(DATA(iCh,t:end)>PARAM.ZSThreshold,1);
-        
         if isempty(new_detection)
             CONTINUE = 0;
         else
             new_detection = t-1+new_detection; % il faut enlever 1 car 't' correspond au premier terme de la matrice
             begin_time = find(DATA(iCh,1:new_detection)<PARAM.ZSBeginThreshold,1,'last')+1;
             end_time = find(DATA(iCh,new_detection:end)<PARAM.ZSResetThreshold,1) + new_detection-1;
-            
             if isempty(begin_time)
                 begin_time = 1;
             end
-            
             if isempty(end_time)
                 end_time = nbPts;
             end
-            
             [max_ampli, peak_time] = max(DATA(iCh,new_detection:end_time));
             peak_time = peak_time +new_detection-1;
-            
             % create marker structure with updated fields
             newMrks = markers([]);
-            
             % populate event information
             newMrks(1).type = PARAM.eventName;
             newMrks(1).latency = begin_time;
@@ -110,7 +135,6 @@ for iCh = 1:nbCh
             newMrks(1).area = [];
             newMrks(1).frequency = [];
             newMrks(1).urevent = [];
-            
             % Apply minimum spindle duration criteria, if specified in PARAM.minDur
             if ~isempty(PARAM.minDur)
                 if newMrks.duration > PARAM.minDur*ZS.srate && newMrks.duration < PARAM.maxDur*ZS.srate
@@ -119,17 +143,14 @@ for iCh = 1:nbCh
             else
                 markers = [markers newMrks];
             end
-            
             % if we come back in a spindle => go to the next point below the threshold
             t = (end_time + ZSDelay) + find(DATA(iCh,(end_time +1 + ZSDelay):end)<PARAM.ZSThreshold,1);
-            
             if isempty(t)
                 CONTINUE = 0;
             end
         end
     end
 end
-
 ZS.event = markers;
 
 end
