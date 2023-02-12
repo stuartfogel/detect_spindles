@@ -71,6 +71,9 @@ fprintf(1,'%s\n',['Processing file ' EEG.setname]);
 EEG.data = double(EEG.data);
 
 %% 1) COMPLEX DEMODULATION OR RMS
+% progress bar
+progress = waitbar(0, 'Performing Complex Demodulation / RMS...');
+pause(1)
 
 % 1a) channels of interest
 if ~isempty(PARAM.channels_of_interest)
@@ -95,9 +98,12 @@ t1 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t1,t0)) ' sec.']);
 
 %% 2) Z-SCORE NORMALIZATION
-
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 2: Z-SCORE NORMALIZATION');
+
+% progress bar
+waitbar(1/6*1,progress,'Normalizing signal...');
+pause(1)
 
 % 2a) set data during movements to NaN so they don't contaminate normalization
 EEGnan = DS_NaNbadData(EEGfreq,PARAM);
@@ -112,6 +118,10 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)/60) ' min.']);
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 3: SPINDLE DETECTION');
 
+% progress bar
+waitbar(1/6*2,progress,'Detecting spindles...');
+pause(1)
+
 % detect spindles
 [EEGs] = DS_Threshold(EEGz,PARAM);
 EEGs = eeg_checkset(EEGs,'eventconsistency');
@@ -122,6 +132,10 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t3,t2)/60) ' min.']);
 %% 4) REMOVE SPINDLES OUTSIDE NREM
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 4: REMOVE SPINDLES OUTSIDE NREM');
+
+% progress bar
+waitbar(1/6*3,progress,'Remove spindles outside NREM...');
+pause(1)
 
 if ~isempty(PARAM.goodsleepstages)
     EEGb = DS_remBadSleepStage(EEGs, PARAM);
@@ -138,6 +152,10 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t4,t3)/60) ' min.']);
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 5: REMOVE SPINDLES DURING MOVEMENT ARTIFACT');
 
+% progress bar
+waitbar(1/6*4,progress,'Remove spindles during movement...');
+pause(1)
+
 EEGm = DS_remBadMinMax(EEGb, PARAM);
 EEGm = eeg_checkset(EEGm,'eventconsistency');
 
@@ -147,6 +165,10 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)/60) ' min.']);
 %% 6) SPINDLE CHARACTERIZATION
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 6: SPINDLE CHARACTERIZATION');
+
+% progress bar
+waitbar(1/6*5,progress,'Characterizing spindles...');
+pause(1)
 
 % replace original EEG dataset events with final events structure
 EEG.event = EEGm.event;
@@ -161,6 +183,10 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t6,t5)/60) ' min.']);
 fprintf(1,'%s\n',' ');
 fprintf(1,'%s\n','STEP 7: EXPORT SPINDLE MARKERS');
 
+% progress bar
+waitbar(1/6*5,progress,'Export spindle results...');
+pause(1)
+
 if isfield(PARAM,'save_result_file')
     if ~isempty(PARAM.save_result_file)
         DS_export_Spindles_csv(EEG,PARAM);
@@ -169,5 +195,10 @@ end
 
 t7 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t7,t6)/60) ' min.']);
+
+% progress bar
+waitbar(1/6*6,progress,'Spindle detection complete...');
+pause(1)
+close(progress)
 
 end
