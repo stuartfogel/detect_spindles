@@ -64,10 +64,12 @@ SpindleIdx = find(ismember({Event.type},PARAM.eventName));
 ToRmv = [];
 
 for iSpin = SpindleIdx % loop on Spindle
-    bad = find(ismember({Event(1:iSpin).type},PARAM.badData),1,'last');
+    bad = find(ismember({Event(1:iSpin).type},PARAM.badData));
     if ~isempty(bad)
-        if Event(bad).latency + Event(bad).duration > Event(iSpin).latency
-            ToRmv(end+1) = iSpin;
+        for nBad = 1:length(bad)
+            if Event(iSpin).latency < Event(bad(nBad)).latency + Event(bad(nBad)).duration
+                ToRmv(end+1) = iSpin;
+            end
         end
     end
 end

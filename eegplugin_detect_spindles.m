@@ -56,7 +56,7 @@ function vers = eegplugin_detect_spindles(fig, trystrs, catchstrs)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-vers = '2.9.1';
+vers = '2.9.2';
 if nargin < 3
     error('eegplugin_detect_spindles requires 3 arguments');
 end
