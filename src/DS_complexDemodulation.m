@@ -59,23 +59,21 @@ function [EEG,PARAM] = DS_complexDemodulation(EEG,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[b, a] = butter(PARAM.cdemod_forder ,  PARAM.cdemod_filter_lowpass / EEG.srate , 'low');
+% build filter
+[b, a] = butter(PARAM.cdemod_forder, PARAM.cdemod_filter_lowpass/EEG.srate , 'low');
 
 % Complex Demodulation
-carArray = exp(-2*pi * 1i * PARAM.cdemod_freq * (0:(size(EEG.data,2) - 1)) / EEG.srate);
+carArray = exp(-2*pi * 1i * PARAM.cdemod_freq * (0:(size(EEG.data,2) - 1))/EEG.srate);
 for iChan = 1:EEG.nbchan
-    for iTrial = 1:EEG.trials
-        x = double(EEG.data(iChan, :, iTrial)) .* carArray;
-        x = filtfilt(b, a, x);
-        if size(x,1)>size(x,2)
-            x = x';
-        end
-        x = smoothing(x,EEG.srate/PARAM.cdemod_freq);
-        EEG.data(iChan, :, iTrial) = (real(x).^2 + imag(x).^2);
-        % EEG.data(iChan, :, iTrial) = envelope(EEG.data(iChan, :, iTrial),EEG.srate/2,'rms'); % take the envelope of the CD peaks
+    x = double(EEG.data(iChan, :)) .* carArray;
+    x = filtfilt(b, a, x);
+    if size(x,1)>size(x,2)
+        x = x';
     end
+    x = smoothing(x,EEG.srate/PARAM.cdemod_freq);
+    EEG.data(iChan,:) = (real(x).^2 + imag(x).^2);
 end
-
+clear a b carArray iChan x
 end
 
 function newx = smoothing(x,T)
@@ -90,5 +88,5 @@ long = size(x,2);
 for i = 1:long
     newx(:,i) = sum( x(:, max(min(i+tH,long),1)) .* H);
 end
-
+clear a la H tH long i 
 end

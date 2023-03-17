@@ -1,4 +1,4 @@
-function [ZS, markers] = DS_Threshold(ZS,PARAM)
+function [EEG, markers] = DS_Threshold(EEG,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -59,18 +59,8 @@ function [ZS, markers] = DS_Threshold(ZS,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-DATA = ZS.data;
-channels = ZS.chanlocs;
-ZSDelay = round(PARAM.ZSDelay * ZS.srate);
-
-% check the dimension : must be (ch x times)
-if size(DATA,2)<size(DATA,1)
-    DATA = DATA';
-end
-[nbCh, nbPts] = size(DATA);
-
 % create marker structure based on original
-markers = ZS.event;
+markers = EEG.event;
 
 % add necessary spindle events fields to original structure
 if ~isfield(markers,'type')
@@ -97,60 +87,52 @@ end
 if ~isfield(markers,'frequency')
     for nEvt=1:length(markers); markers(nEvt).frequency = []; end
 end
+if ~isfield(markers,'SleepStage')
+    for nEvt=1:length(markers); markers(nEvt).SleepStage = []; end
+end
 if ~isfield(markers,'urevent')
     for nEvt=1:length(markers); markers(nEvt).urevent = []; end
 end
+clear nEvt
 
-% for iCh = 1:nbCh
-for iCh = 1:nbCh
-    t = 1;
-    CONTINUE = 1;
-    while CONTINUE
-        % loop over time
-        t;
-        new_detection = find(DATA(iCh,t:end)>PARAM.ZSThreshold,1);
-        if isempty(new_detection)
-            CONTINUE = 0;
-        else
-            new_detection = t-1+new_detection; % il faut enlever 1 car 't' correspond au premier terme de la matrice
-            begin_time = find(DATA(iCh,1:new_detection)<PARAM.ZSBeginThreshold,1,'last')+1;
-            end_time = find(DATA(iCh,new_detection:end)<PARAM.ZSResetThreshold,1) + new_detection-1;
-            if isempty(begin_time)
-                begin_time = 1;
-            end
-            if isempty(end_time)
-                end_time = nbPts;
-            end
-            [max_ampli, peak_time] = max(DATA(iCh,new_detection:end_time));
-            peak_time = peak_time +new_detection-1;
-            % create marker structure with updated fields
-            newMrks = markers([]);
-            % populate event information
-            newMrks(1).type = PARAM.eventName;
-            newMrks(1).latency = begin_time;
-            newMrks(1).channel = channels(iCh).labels;
-            newMrks(1).duration = end_time - begin_time;
-            newMrks(1).peak = peak_time;
-            newMrks(1).amplitude = [];
-            newMrks(1).area = [];
-            newMrks(1).frequency = [];
-            newMrks(1).urevent = [];
-            % Apply minimum spindle duration criteria, if specified in PARAM.minDur
-            if ~isempty(PARAM.minDur)
-                if newMrks.duration > PARAM.minDur*ZS.srate && newMrks.duration < PARAM.maxDur*ZS.srate
-                    markers = [markers newMrks];
-                end
-            else
+for nCh = 1:EEG.nbchan
+    [~,latency,~,~] = findpeaks(EEG.data(nCh,:), 'MinPeakHeight', PARAM.ZSThreshold, 'MinPeakDistance', round(PARAM.ZSDelay * EEG.srate),'Annotate','extents');
+    for nEvt = 1:length(latency)
+        begin_time = find(EEG.data(nCh,1:latency(nEvt))<PARAM.ZSBeginThreshold,1,'last')+1;
+        end_time = find(EEG.data(nCh,latency(nEvt):end)<PARAM.ZSResetThreshold,1) + latency(nEvt)-1;
+        if isempty(begin_time) % in case it's before the data starts
+            begin_time = 1;
+        end
+        if isempty(end_time) % in case it's after the data ends
+            end_time = size(EEG.data,2);
+        end
+        [~,peak_time] = max(EEG.data(nCh,begin_time:end_time));
+        peak_time = peak_time + latency(nEvt)-1;
+        % create marker structure with updated fields
+        newMrks = markers([]);
+        % populate event information
+        newMrks(1).type = PARAM.eventName;
+        newMrks(1).latency = begin_time;
+        newMrks(1).channel = EEG.chanlocs(nCh).labels;
+        newMrks(1).duration = end_time - begin_time;
+        newMrks(1).peak = peak_time;
+        newMrks(1).amplitude = []; % to be determined later from raw signal
+        newMrks(1).area = []; % to be determined later from raw signal
+        newMrks(1).frequency = []; % to be determined later from raw signal
+        newMrks(1).SleepStage = []; % to be determined later from raw signal
+        newMrks(1).urevent = [];
+        % Apply minimum spindle duration criteria, if specified in PARAM.minDur
+        if ~isempty(PARAM.minDur)
+            if newMrks.duration > PARAM.minDur*EEG.srate && newMrks.duration < PARAM.maxDur*EEG.srate
                 markers = [markers newMrks];
             end
-            % if we come back in a spindle => go to the next point below the threshold
-            t = (end_time + ZSDelay) + find(DATA(iCh,(end_time +1 + ZSDelay):end)<PARAM.ZSThreshold,1);
-            if isempty(t)
-                CONTINUE = 0;
-            end
+        else
+            markers = [markers newMrks];
         end
+        clear begin_time end_time peak_time newMrks
     end
+    clear nEvt latency
 end
-ZS.event = markers;
-
+EEG.event = markers;
+clear markers nCh
 end

@@ -2,7 +2,7 @@ function EEG = DS_NaNbadData(EEG,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% NaN data during bad data events
+% NaN data during bad data events and stages outside NREM
 %
 % Part of detect_spindles toolbox:
 %
@@ -60,7 +60,8 @@ function EEG = DS_NaNbadData(EEG,PARAM)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Event = EEG.event;
-badIdx = find(ismember({Event.type},PARAM.badData));
+badStages = PARAM.allsleepstages(~ismember(PARAM.allsleepstages,PARAM.goodsleepstages));
+badIdx = find(ismember({Event.type},[PARAM.badData badStages]));
 badIdx = int32(floor(badIdx)); % convert to integer to avoid unnecessary matlab warning
 
 if ~isempty(badIdx)

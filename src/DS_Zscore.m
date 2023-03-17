@@ -1,8 +1,8 @@
-function EEG = DS_remBadSleepStage(EEG, PARAM)
+function EEG = DS_Zscore(EEG,StartEEG,EndEEG,~)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Remove events outside sleep stages of interest
+% Normalize EEG signal using sliding window
 %
 % Part of detect_spindles toolbox:
 %
@@ -59,32 +59,14 @@ function EEG = DS_remBadSleepStage(EEG, PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Event = EEG.event;
-
-% preallocate new field
-for nEvt = 1:length(Event)
-    Event(nEvt).SleepStage = '';
+% if PARAM.noWindow == 1 % use sleep stage periods for normalization step
+EEG.data(:,StartEEG:EndEEG) = normalize(EEG.data(:,StartEEG:EndEEG),2);
+for nCh = 1:EEG.nbchan
+    EEGdatatemp = EEG.data(nCh,StartEEG:EndEEG);
+    negZidx = find(EEGdatatemp <= 0);
+    EEGdatatemp(negZidx) = 0;
+    EEG.data(nCh,StartEEG:EndEEG) = EEGdatatemp;
+    clear EEGdatatemp negZidx
 end
-clear nEvt
-
-mrkScoring = PARAM.allsleepstages;
-mrkSelectedScoring = PARAM.goodsleepstages;
-SpindleIdx = find(ismember({Event.type},PARAM.eventName));
-
-for iSpin = SpindleIdx % loop on Spindle
-    lastScoring = find(ismember({Event(1:iSpin).type},mrkScoring),1,'last');
-    if ~isempty(lastScoring)
-        Event(iSpin).SleepStage = Event(lastScoring).type;
-    else
-        Event(iSpin).SleepStage = '';
-    end
-end
-
-% let's kill the bad spindle
-SpindleIdx = logical(ismember({Event.type},PARAM.eventName));
-GoodScoring = logical(ismember({Event.SleepStage},mrkSelectedScoring));
-% GoodScoring = logical(ismember({Event.SleepStage},deblank(mrkSelectedScoring))); % some import utilities add a trailing space to the marker names, using deblank to ignore them
-Event(SpindleIdx & (~GoodScoring)) = [];
-EEG.event = Event;
-
+clear nCh
 end

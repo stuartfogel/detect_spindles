@@ -1,4 +1,4 @@
-function [EEG] = detect_spindles(EEG,PARAM)
+function EEG = detect_spindles(EEG,PARAM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -68,28 +68,31 @@ t0 = clock; % start time
 fprintf(1,'%s\n',['------------------------ ' datestr(t0) ' ------------------------']);
 fprintf(1,'%s\n',['Processing file ' EEG.setname]);
 % Check data format for compatibility. Ensure EEG.data are double (filtfilt requirement). This also resolves other related issues.
-EEG.data = double(EEG.data);
+EEG.data = double(EEG.data); % required for filtering
+% extract EEG periods of interest based on sleep stage labels
+EEGperiods = DS_getEEGperiods(EEG,PARAM);
 
 %% 1) COMPLEX DEMODULATION OR RMS
 % progress bar
-progress = waitbar(0, 'Performing Complex Demodulation / RMS...');
+progress = waitbar(1/5*0, 'Performing Complex Demodulation / RMS...');
 pause(1)
 
 % 1a) channels of interest
 if ~isempty(PARAM.channels_of_interest)
     EEGcoi = DS_extract_ChOI(EEG,PARAM);
+else
+    EEGcoi = EEG;
 end
+EEGfreq = EEGcoi;
 
 % 1b) if complex demodulation is your preference
 if PARAM.cdemodORrms == 1
-    fprintf(1,'%s\n',' ');
-    fprintf(1,'%s\n','STEP 1: COMPLEX DEMODULATION');
-    EEGfreq = DS_complexDemodulation(EEGcoi,PARAM);
-    % 1c) if RMS is your weapon of choice
+    EEGfreq = DS_complexDemodulation(EEGfreq,PARAM);
+% 1c) if RMS is your weapon of choice
 elseif PARAM.cdemodORrms == 0
-    fprintf(1,'%s\n',' ');
-    fprintf(1,'%s\n','STEP 1: ROOT MEAN SQUARE TRANSFORMATION');
-    EEGfreq = DS_rms(EEGcoi,PARAM);
+    % filer
+    EEGfreq = pop_eegfiltnew(EEGfreq, 'locutoff',PARAM.rmshp,'hicutoff',PARAM.rmslp);
+    EEGfreq = DS_rms(EEGfreq,PARAM);
 else
     error('Please choose either complex demodulate or RMS to extract frequencies of interest.')
 end
@@ -98,106 +101,79 @@ t1 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t1,t0)) ' sec.']);
 
 %% 2) Z-SCORE NORMALIZATION
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 2: Z-SCORE NORMALIZATION');
 
 % progress bar
-waitbar(1/6*1,progress,'Normalizing signal...');
+waitbar(1/5*1,progress,'Normalizing signal...');
 pause(1)
 
 % 2a) set data during movements to NaN so they don't contaminate normalization
 EEGnan = DS_NaNbadData(EEGfreq,PARAM);
+EEGz = EEGnan;
 
 % 2b) Signal normalization
-EEGz = DS_Zscore_new(EEGnan,PARAM);
+for nPer = 1:height(EEGperiods)
+    StartEEG = EEGperiods{nPer,'StartEEG'}{:};
+    EndEEG = EEGperiods{nPer,'EndEEG'}{:};
+    EEGz = DS_Zscore(EEGz,StartEEG,EndEEG,PARAM);
+end
+clear nPer StartEEG EndEEG
 
 t2 = clock;
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)/60) ' min.']);
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)) ' sec.']);
 
 %% 3) SPINDLE DETECTION
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 3: SPINDLE DETECTION');
 
 % progress bar
-waitbar(1/6*2,progress,'Detecting spindles...');
+waitbar(1/5*2,progress,'Detecting spindles...');
 pause(1)
 
 % detect spindles
-[EEGs] = DS_Threshold(EEGz,PARAM);
+EEGs = DS_Threshold(EEGz,PARAM);
 EEGs = eeg_checkset(EEGs,'eventconsistency');
 
 t3 = clock;
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t3,t2)/60) ' min.']);
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t3,t2)) ' sec.']);
 
-%% 4) REMOVE SPINDLES OUTSIDE NREM
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 4: REMOVE SPINDLES OUTSIDE NREM');
+%% 5) SPINDLE CHARACTERIZATION
 
 % progress bar
-waitbar(1/6*3,progress,'Remove spindles outside NREM...');
-pause(1)
-
-if ~isempty(PARAM.goodsleepstages)
-    EEGb = DS_remBadSleepStage(EEGs, PARAM);
-    EEGb = eeg_checkset(EEGb,'eventconsistency');
-    t4 = clock;
-else
-    t4 = clock;
-    disp('Removed spindles from outside NREM skipped')
-end
-
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t4,t3)/60) ' min.']);
-
-%% 5) REMOVE SPINDLES DURING MOVEMENT ARTIFACT
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 5: REMOVE SPINDLES DURING MOVEMENT ARTIFACT');
-
-% progress bar
-waitbar(1/6*4,progress,'Remove spindles during movement...');
-pause(1)
-
-EEGm = DS_remBadMinMax(EEGb, PARAM);
-EEGm = eeg_checkset(EEGm,'eventconsistency');
-
-t5 = clock;
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)/60) ' min.']);
-
-%% 6) SPINDLE CHARACTERIZATION
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 6: SPINDLE CHARACTERIZATION');
-
-% progress bar
-waitbar(1/6*5,progress,'Characterizing spindles...');
+waitbar(1/5*3,progress,'Characterizing spindles...');
 pause(1)
 
 % replace original EEG dataset events with final events structure
-EEG.event = EEGm.event;
+EEG.event = EEGs.event;
 
+% get additional spindle characteristics from raw EEG trace
 EEG = DS_characSpindles(EEG, PARAM);
 EEG = eeg_checkset(EEG, 'checkur');
 
-t6 = clock;
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t6,t5)/60) ' min.']);
+t4 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t4,t3)) ' sec.']);
 
-%% 7) EXPORT SPINDLE MARKERS
-fprintf(1,'%s\n',' ');
-fprintf(1,'%s\n','STEP 7: EXPORT SPINDLE MARKERS');
+%% 6) EXPORT SPINDLE MARKERS
 
 % progress bar
-waitbar(1/6*5,progress,'Export spindle results...');
+waitbar(1/5*4,progress,'Export spindle results...');
 pause(1)
 
 if isfield(PARAM,'save_result_file')
     if ~isempty(PARAM.save_result_file)
-        DS_export_Spindles_csv(EEG,PARAM);
+        EEGtemp = pop_selectevent(EEG,'type',PARAM.eventName,'select','normal','deleteevents','on');
+        if ~isempty(EEG.event)
+            results = struct2table(EEGtemp.event);
+            writetable(results, [EEG.filepath EEG.setname '_events.csv']);
+            save([EEG.filepath EEG.setname '_events'],'results');
+        else
+            warning('No spindles detected.')
+        end
     end
 end
 
-t7 = clock;
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t7,t6)/60) ' min.']);
+t5 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)) ' sec.']);
 
 % progress bar
-waitbar(1/6*6,progress,'Spindle detection complete...');
+waitbar(1/5*5,progress,'Spindle detection complete...');
 pause(1)
 close(progress)
 

@@ -59,12 +59,9 @@ function [EEG , PARAM] = DS_rms(EEG,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% filer
-EEG = pop_eegfiltnew(EEG, 'locutoff',PARAM.rmshp,'hicutoff',PARAM.rmslp);
-
 % root mean square
 for iChan = 1:EEG.nbchan
     EEG.data(iChan,:) = envelope(EEG.data(iChan,:),EEG.srate/2,'rms'); % get the envelope of the rms
 end
-
+clear iChan
 end

@@ -66,6 +66,7 @@ end
 indlogicalSpindles = strcmpi({EEG.event.type},PARAM.eventName);
 indSpindle = find(indlogicalSpindles);
 
+% characterize spindles (amplitude, area, frequency)
 for iSpin = indSpindle
     Spindle  = EEG.event(iSpin);
     sp_beg = Spindle.latency;
@@ -82,6 +83,20 @@ for iSpin = indSpindle
     end
     EEG.event(iSpin).frequency = freq;
 end
+
+% label events with sleep stage
+Event = EEG.event;
+evtIdx = find(ismember({Event.type},PARAM.eventName));
+for iEvt = evtIdx % loop on event
+    lastScoring = find(ismember({Event(1:iEvt).type},PARAM.allsleepstages),1,'last');
+    if ~isempty(lastScoring)
+        Event(iEvt).SleepStage = Event(lastScoring).type;
+    else
+        Event(iEvt).SleepStage = '';
+    end
+end
+EEG.event = Event;
+clear Event evtIdx iEvt lastScoring
 
 end
 
