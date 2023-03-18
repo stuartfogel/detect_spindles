@@ -112,8 +112,8 @@ EEGz = EEGnan;
 
 % 2b) Signal normalization
 for nPer = 1:height(EEGperiods)
-    StartEEG = EEGperiods{nPer,'StartEEG'}{:};
-    EndEEG = EEGperiods{nPer,'EndEEG'}{:};
+    StartEEG = EEGperiods{nPer,'StartEEG'};
+    EndEEG = EEGperiods{nPer,'EndEEG'};
     EEGz = DS_Zscore(EEGz,StartEEG,EndEEG,PARAM);
 end
 clear nPer StartEEG EndEEG

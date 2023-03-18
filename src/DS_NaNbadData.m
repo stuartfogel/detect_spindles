@@ -71,6 +71,6 @@ if ~isempty(badIdx)
 else
     warning('No bad data markers in your recording. You should be sure to movement artifact your data before spindle detection.')
 end
-clear Event badIdx ibad
+clear Event badStages badIdx ibad
 
 end

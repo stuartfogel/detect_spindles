@@ -59,11 +59,10 @@ function EEG = DS_Zscore(EEG,StartEEG,EndEEG,~)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% if PARAM.noWindow == 1 % use sleep stage periods for normalization step
 EEG.data(:,StartEEG:EndEEG) = normalize(EEG.data(:,StartEEG:EndEEG),2);
 for nCh = 1:EEG.nbchan
     EEGdatatemp = EEG.data(nCh,StartEEG:EndEEG);
-    negZidx = find(EEGdatatemp <= 0);
+    negZidx = EEGdatatemp <= 0;
     EEGdatatemp(negZidx) = 0;
     EEG.data(nCh,StartEEG:EndEEG) = EEGdatatemp;
     clear EEGdatatemp negZidx

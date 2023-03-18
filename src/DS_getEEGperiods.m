@@ -59,61 +59,25 @@ function [EEGperiods] = DS_getEEGperiods(EEG,PARAM)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% setup variables
-Name = [];
-EEGperiod = [];
-StartEEG = [];
-EndEEG = [];
-evtCount = 1;
-
 % convert eeglab event structure to table
 events = struct2table(EEG.event);
 
 % filter events table so that it only contains sleep stages
 events(~ismember(events.type,PARAM.allsleepstages),:) = [];
 
-%% find start and end of EEG periods
+% find start and end of EEG periods
 for nStage = 1:length(PARAM.goodsleepstages)
-    for nEvt = 1:height(events)
-        if strcmp(char(table2cell(events(nEvt,'type'))),PARAM.goodsleepstages(nStage))
-            if nEvt == height(events) % catch if last epoch is valid
-                if ~strcmp(table2cell(events(nEvt-1,'type')),PARAM.goodsleepstages(nStage)) % capture isolated and last epoch
-                    Name{evtCount} = EEG.setname;
-                    EEGperiod{evtCount} = PARAM.goodsleepstages{nStage};
-                    StartEEG{evtCount} = round(table2array(events(nEvt,'latency')));
-                    EndEEG{evtCount} = round(table2array(events(nEvt,'latency'))) + table2array(events(nEvt,'duration')) - 1;
-                    evtCount = evtCount + 1;
-                elseif strcmp(char(table2cell(events(nEvt,'type'))),PARAM.goodsleepstages(nStage)) % if last event is not isolated, but still valid
-                    EndEEG{evtCount} = round(table2array(events(nEvt,'latency'))) + table2array(events(nEvt,'duration')) - 1;
-                    evtCount = evtCount + 1;
-                else
-                    continue
-                end
-            else
-                if ~strcmp(char(table2cell(events(nEvt-1,'type'))),PARAM.goodsleepstages(nStage)) && ~strcmp(char(table2cell(events(nEvt+1,'type'))),PARAM.goodsleepstages(nStage)) % capture isolated periods
-                    Name{evtCount} = EEG.setname;
-                    EEGperiod{evtCount} = PARAM.goodsleepstages{nStage};
-                    StartEEG{evtCount} = round(table2array(events(nEvt,'latency')));
-                    EndEEG{evtCount} = round(table2array(events(nEvt+1,'latency'))) + table2array(events(nEvt,'duration')) - 1;
-                    evtCount = evtCount + 1;
-                elseif ~strcmp(char(table2cell(events(nEvt-1,'type'))),PARAM.goodsleepstages(nStage)) && strcmp(char(table2cell(events(nEvt+1,'type'))),PARAM.goodsleepstages(nStage)) % capture start of >1 periods
-                    Name{evtCount} = EEG.setname;
-                    EEGperiod{evtCount} = PARAM.goodsleepstages{nStage};
-                    StartEEG{evtCount} = round(table2array(events(nEvt,'latency')));
-                elseif ~strcmp(char(table2cell(events(nEvt+1,'type'))),PARAM.goodsleepstages(nStage)) % capture the end of the period
-                    EndEEG{evtCount} = round(table2array(events(nEvt+1,'latency'))) + table2array(events(nEvt,'duration')) - 1;
-                    evtCount = evtCount + 1;
-                else
-                    continue
-                end
-            end
-        end
-    end
+    idx = ismember(events{:,'type'},PARAM.goodsleepstages(nStage));
+    StartIdx{nStage} = strfind([ 0 idx'],[0 1]);
+    EndIdx{nStage} = strfind([idx',0],[1 0]);
 end
+StartEEG = events{[StartIdx{:}],'latency'};
+EndEEG = events{[EndIdx{:}],'latency'} + events{[EndIdx{:}],'duration'} - 1;
+clear events nStage idx StartIdx EndIdx
 
 % put it in a table for output
-EEGperiods = table(Name(:),EEGperiod(:),StartEEG(:),EndEEG(:),'VariableNames',{'Name','EEGperiod','StartEEG','EndEEG'});
+EEGperiods = table(StartEEG(:),EndEEG(:),'VariableNames',{'StartEEG','EndEEG'});
 EEGperiods = sortrows(EEGperiods,"StartEEG");
-clear EndEEG StartEEG evtCount EEGper EEGperiod Name events nEvt
+clear StartEEG EndEEG
 
 end
