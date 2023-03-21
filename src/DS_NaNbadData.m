@@ -64,19 +64,24 @@ for nPer = 1:height(EEGperiods)
     if nPer == 1 % NaN from start of file to first good period
         StartEEG = 1; % start of dataset
         EndEEG = EEGperiods{nPer,'StartEEG'} - 1;
-        EEG.data(:, StartEEG:EndEEG) = NaN; % convert to integer to avoid unnecessary matlab warning
+        EEG.data(:, StartEEG:EndEEG) = NaN; 
+        % NaN from the end of first good period to the next good period
         StartEEG = EEGperiods{nPer,'EndEEG'} + 1;
-        EndEEG = EEGperiods{nPer+1,'StartEEG'} - 1;
-        EEG.data(:, StartEEG:EndEEG) = NaN; % convert to integer to avoid unnecessary matlab warning
-    elseif nPer == height(EEGperiods) % NaN from end of last good period to end of files
+        if height(EEGperiods) > 1 % in case there is only one good period, NaN from end of last good period to end of file
+            EndEEG = EEGperiods{nPer+1,'StartEEG'} - 1;
+        else
+            EndEEG = EEG.pnts; % end of dataset
+        end
+        EEG.data(:, StartEEG:EndEEG) = NaN; 
+    elseif nPer == height(EEGperiods) && nPer ~= 1 % NaN from end of last good period to end of file
         StartEEG = EEGperiods{nPer,'EndEEG'} + 1;
         EndEEG = EEG.pnts; % end of dataset
-        EEG.data(:, StartEEG:EndEEG) = NaN; % convert to integer to avoid unnecessary matlab warning
-    else % NaN in between good periods
+        EEG.data(:, StartEEG:EndEEG) = NaN; 
+    elseif nPer ~= height(EEGperiods) && nPer ~= 1 % NaN in between good periods
         StartEEG = EEGperiods{nPer,'EndEEG'} + 1;
         EndEEG = EEGperiods{nPer+1,'StartEEG'} - 1;
         if StartEEG < EndEEG % they are directly adjacent, so don't do anything
-            EEG.data(:, StartEEG:EndEEG) = NaN; % convert to integer to avoid unnecessary matlab warning
+            EEG.data(:, StartEEG:EndEEG) = NaN; 
         end
     end
 end

@@ -64,6 +64,9 @@ events = struct2table(EEG.event);
 
 % filter events table so that it only contains sleep stages
 events(~ismember(events.type,PARAM.allsleepstages),:) = [];
+if isempty(events)
+    error('No sleep stages found. If not expected, check EEG.events and detection settings.')
+end
 
 % find start and end of EEG periods
 for nStage = 1:length(PARAM.goodsleepstages)
