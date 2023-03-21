@@ -107,7 +107,7 @@ waitbar(1/5*1,progress,'Normalizing signal...');
 pause(1)
 
 % 2a) set data during movements to NaN so they don't contaminate normalization
-EEGnan = DS_NaNbadData(EEGfreq,PARAM);
+EEGnan = DS_NaNbadData(EEGfreq,PARAM,EEGperiods);
 EEGz = EEGnan;
 
 % 2b) Signal normalization

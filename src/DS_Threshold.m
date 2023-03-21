@@ -96,7 +96,7 @@ end
 clear nEvt
 
 for nCh = 1:EEG.nbchan
-    [~,latency,~,~] = findpeaks(EEG.data(nCh,:), 'MinPeakHeight', PARAM.ZSThreshold, 'MinPeakDistance', round(PARAM.ZSDelay * EEG.srate),'Annotate','extents');
+    [~,latency,~,~] = findpeaks(EEG.data(nCh,:), 'MinPeakHeight', PARAM.ZSThreshold, 'MinPeakDistance', round(PARAM.ZSDelay * EEG.srate));
     for nEvt = 1:length(latency)
         begin_time = find(EEG.data(nCh,1:latency(nEvt))<PARAM.ZSBeginThreshold,1,'last')+1;
         end_time = find(EEG.data(nCh,latency(nEvt):end)<PARAM.ZSResetThreshold,1) + latency(nEvt)-1;
