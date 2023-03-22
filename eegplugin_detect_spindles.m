@@ -64,7 +64,7 @@ end
 % add plugin folder to path
 if exist('pop_detect_spindles.m','file')
     p = which('eegplugin_detect_spindles');
-    p = p(1:findstr(p,'eegplugin_detect_spindles.m')-1);
+    p = p(1:strfind(p,'eegplugin_detect_spindles.m')-1);
     addpath(p);
     addpath([p 'src/'])
 end
