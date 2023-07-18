@@ -123,11 +123,15 @@ for nCh = 1:EEG.nbchan
         newMrks(1).urevent = [];
         % Apply minimum spindle duration criteria, if specified in PARAM.minDur
         if ~isempty(PARAM.minDur)
-            if newMrks.duration > PARAM.minDur*EEG.srate && newMrks.duration < PARAM.maxDur*EEG.srate
-                markers = [markers newMrks];
+            if newMrks.latency ~= markers(end).latency % ensure that consecutive duplicates are not added
+                if newMrks.duration > PARAM.minDur*EEG.srate && newMrks.duration < PARAM.maxDur*EEG.srate
+                    markers = [markers newMrks];
+                end
             end
         else
-            markers = [markers newMrks];
+            if newMrks.latency ~= markers(end).latency % ensure that consecutive duplicates are not added
+                markers = [markers newMrks];
+            end
         end
         clear begin_time end_time peak_time newMrks
     end
