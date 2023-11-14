@@ -74,7 +74,7 @@ EEGperiods = DS_getEEGperiods(EEG,PARAM);
 
 %% 1) COMPLEX DEMODULATION OR RMS
 % progress bar
-progress = waitbar(1/5*0, 'Performing Complex Demodulation / RMS...');
+progress = waitbar(1/6*0, 'Performing Complex Demodulation / RMS...');
 pause(1)
 
 % 1a) channels of interest
@@ -103,7 +103,7 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t1,t0)) ' sec.']);
 %% 2) Z-SCORE NORMALIZATION
 
 % progress bar
-waitbar(1/5*1,progress,'Normalizing signal...');
+waitbar(1/6*1,progress,'Normalizing signal...');
 pause(1)
 
 % 2a) set data during movements to NaN so they don't contaminate normalization
@@ -124,7 +124,7 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t2,t1)) ' sec.']);
 %% 3) SPINDLE DETECTION
 
 % progress bar
-waitbar(1/5*2,progress,'Detecting spindles...');
+waitbar(1/6*2,progress,'Detecting spindles...');
 pause(1)
 
 % detect spindles
@@ -137,7 +137,7 @@ fprintf(1,'%s\n',[' ~~ ' num2str(etime(t3,t2)) ' sec.']);
 %% 5) SPINDLE CHARACTERIZATION
 
 % progress bar
-waitbar(1/5*3,progress,'Characterizing spindles...');
+waitbar(1/6*3,progress,'Characterizing spindles...');
 pause(1)
 
 % replace original EEG dataset events with final events structure
@@ -150,10 +150,23 @@ EEG = eeg_checkset(EEG, 'checkur');
 t4 = clock;
 fprintf(1,'%s\n',[' ~~ ' num2str(etime(t4,t3)) ' sec.']);
 
-%% 6) EXPORT SPINDLE MARKERS
+%% 6) DELETE ANY DUPLICATE SPINDLE EVENTS, IF THEY EXIST (A RARE POSSIBILITY)
 
 % progress bar
-waitbar(1/5*4,progress,'Export spindle results...');
+waitbar(1/6*4,progress,'Remove duplicates (if any)...');
+pause(1)
+
+% find and delete duplicates (if any, which is very rare, but possible)
+EEG = DS_deleteDuplicates(EEG);
+EEG = eeg_checkset(EEG, 'eventconsistency');
+
+t5 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)) ' sec.']);
+
+%% 7) EXPORT SPINDLE MARKERS
+
+% progress bar
+waitbar(1/6*5,progress,'Export spindle results...');
 pause(1)
 
 if isfield(PARAM,'save_result_file')
@@ -169,11 +182,11 @@ if isfield(PARAM,'save_result_file')
     end
 end
 
-t5 = clock;
-fprintf(1,'%s\n',[' ~~ ' num2str(etime(t5,t4)) ' sec.']);
+t6 = clock;
+fprintf(1,'%s\n',[' ~~ ' num2str(etime(t6,t5)) ' sec.']);
 
 % progress bar
-waitbar(1/5*5,progress,'Spindle detection complete...');
+waitbar(1/6*6,progress,'Spindle detection complete...');
 pause(1)
 close(progress)
 
