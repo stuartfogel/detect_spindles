@@ -1,4 +1,4 @@
-function DS_deleteDuplicates(EEG)
+function EEG = DS_deleteDuplicates(EEG)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
