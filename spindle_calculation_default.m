@@ -79,7 +79,7 @@ for nfile = 1:length(PARAM.filename)
     end
 end
 
-%% Separate into spindles from specified duration, channel, stage, type (defined above)
+%% Separate into spindles from specified channel, stage, type (defined above)
 [~, data] = deal(cell(size(PARAM.filename))); % preallocate temp holding vars for loading data
 for nfile = 1:length(PARAM.filename)
     % read in raw data to table format

@@ -174,6 +174,7 @@ if isfield(PARAM,'save_result_file')
         EEGtemp = pop_selectevent(EEG,'type',PARAM.eventName,'select','normal','deleteevents','on');
         if ~isempty(EEG.event)
             results = struct2table(EEGtemp.event);
+            results.duration = results.duration/EEG.srate; % convert spindle duration to seconds for export
             writetable(results, [EEG.filepath EEG.setname '_events.csv']);
             save([EEG.filepath EEG.setname '_events'],'results');
         else
