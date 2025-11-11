@@ -66,6 +66,9 @@ function [EEG,PARAM] = DS_complexDemodulation(EEG,PARAM)
 carArray = exp(-2*pi * 1i * PARAM.cdemod_freq * (0:(size(EEG.data,2) - 1))/EEG.srate);
 for iChan = 1:EEG.nbchan
     x = double(EEG.data(iChan, :)) .* carArray;
+    if any(isnan(x))
+        x(isnan(x)) = 0; % temporarily zero NaN data so filter can run without issue
+    end
     x = filtfilt(b, a, x);
     if size(x,1)>size(x,2)
         x = x';

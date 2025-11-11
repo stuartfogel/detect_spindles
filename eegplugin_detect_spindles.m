@@ -56,7 +56,7 @@ function vers = eegplugin_detect_spindles(fig, trystrs, catchstrs)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-vers = '3.3.5'; % modified spindle duration export to seconds
+vers = '3.3.6'; % handles data that has NaN
 if nargin < 3
     error('eegplugin_detect_spindles requires 3 arguments');
 end

@@ -61,7 +61,11 @@ function [EEG , PARAM] = DS_rms(EEG,PARAM)
 
 % root mean square
 for iChan = 1:EEG.nbchan
-    EEG.data(iChan,:) = envelope(EEG.data(iChan,:),EEG.srate/2,'rms'); % get the envelope of the rms
+    x = EEG.data(iChan,:);
+    if any(isnan(x))
+        x(isnan(x)) = 0; % temporarily zero NaN data so filter can run without issue
+    end
+    EEG.data(iChan,:) = envelope(x,EEG.srate/2,'rms'); % get the envelope of the rms
 end
 clear iChan
 end
