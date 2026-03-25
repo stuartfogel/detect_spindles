@@ -56,7 +56,7 @@ function vers = eegplugin_detect_spindles(fig, trystrs, catchstrs)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-vers = '3.3.6'; % handles data that has NaN
+vers = '3.3.7'; % improved path handling
 if nargin < 3
     error('eegplugin_detect_spindles requires 3 arguments');
 end

@@ -52,22 +52,13 @@ function [ALLEEG] = detect_spindles_batch()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% LOAD EEGLAB
-if ~isempty(which('eeglab'))
-    eeglab nogui
-    clear
-else
-    try
-        dirName = dirNames(startsWith({dirNames([dirNames.isdir]).name}, 'eeglab20')).folder;
-        folderName = dirNames(startsWith({dirNames([dirNames.isdir]).name}, 'eeglab20')).name;
-        if isempty('dirName')
-            errordlg('Please add EEGLAB main folder to Matlab path.','EEGLAB not found')
-            return
-        end
-        addpath([dirName filesep folderName]);
-    catch
-        errordlg('Please add EEGLAB main folder to Matlab path.','EEGLAB not found')
-        return
+if ~isempty(which('eeglab')) % is eeglab main folder in the path?
+    if isempty(which('pop_loadset')) % yes, but, are eeglab default subfolders in the path? If not, run eeglab to add paths.
+        eeglab nogui; clc;
     end
+else % eeglab not found in path
+    errordlg('Please add EEGLAB main folder to Matlab path.','EEGLAB not found.')
+    return
 end
 
 %% SPECIFY FILENAMES (OPTIONAL)
